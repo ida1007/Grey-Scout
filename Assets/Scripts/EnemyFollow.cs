@@ -16,6 +16,10 @@ public class EnemyFollow: MonoBehaviour
 
     public float detectionTimer;
     public bool isFollowing;
+
+    [Header("UI")]
+    public Canvas headCanvas;
+    public UnityEngine.UI.Image barFill;
     void Update()
     {
         float distance = Vector3.Distance(transform.position, player.position);
@@ -38,6 +42,8 @@ public class EnemyFollow: MonoBehaviour
         {
             EnemyFollowing();
         }
+
+        UpdateDetectionUI();
     }
 
     public void EnemyFollowing()
@@ -62,5 +68,25 @@ public class EnemyFollow: MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, detectionAttackRange);
     }
 
+    void UpdateDetectionUI()
+    {
+        if (headCanvas == null || barFill == null)
+            return;//读条显示和隐藏
+
+        if (detectionTimer > 0)
+        {
+            if (!headCanvas.gameObject.activeSelf)
+                headCanvas.gameObject.SetActive(true);
+
+            barFill.fillAmount = detectionTimer / requestStayTime;
+        }
+        else
+        {
+            if (headCanvas.gameObject.activeSelf)
+                headCanvas.gameObject.SetActive(false);
+        }
+        headCanvas.transform.LookAt(Camera.main.transform);// 让读条一直朝向摄像机
+        headCanvas.transform.Rotate(0, 180, 0);
+    }
 
 }
