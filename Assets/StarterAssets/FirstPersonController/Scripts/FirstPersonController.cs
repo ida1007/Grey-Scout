@@ -112,8 +112,6 @@ namespace StarterAssets
 
 		private void Update()
 		{
-			JumpAndGravity();
-			GroundedCheck();
 			Move();
 		}
 
@@ -196,54 +194,6 @@ namespace StarterAssets
 
 			// move the player
 			_controller.Move(inputDirection.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
-		}
-
-		private void JumpAndGravity()
-		{
-			if (Grounded)
-			{
-				// reset the fall timeout timer
-				_fallTimeoutDelta = FallTimeout;
-
-				// stop our velocity dropping infinitely when grounded
-				if (_verticalVelocity < 0.0f)
-				{
-					_verticalVelocity = -2f;
-				}
-
-				// Jump
-				if (_input.jump && _jumpTimeoutDelta <= 0.0f)
-				{
-					// the square root of H * -2 * G = how much velocity needed to reach desired height
-					_verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
-				}
-
-				// jump timeout
-				if (_jumpTimeoutDelta >= 0.0f)
-				{
-					_jumpTimeoutDelta -= Time.deltaTime;
-				}
-			}
-			else
-			{
-				// reset the jump timeout timer
-				_jumpTimeoutDelta = JumpTimeout;
-
-				// fall timeout
-				if (_fallTimeoutDelta >= 0.0f)
-				{
-					_fallTimeoutDelta -= Time.deltaTime;
-				}
-
-				// if we are not grounded, do not jump
-				_input.jump = false;
-			}
-
-			// apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)
-			if (_verticalVelocity < _terminalVelocity)
-			{
-				_verticalVelocity += Gravity * Time.deltaTime;
-			}
 		}
 
 		private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
