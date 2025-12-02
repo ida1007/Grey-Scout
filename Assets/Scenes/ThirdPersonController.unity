@@ -1222,10 +1222,13 @@ GameObject:
   - component: {fileID: 1857681322}
   - component: {fileID: 1857681321}
   - component: {fileID: 1857681320}
-  - component: {fileID: 1857681325}
   - component: {fileID: 1857681319}
-  - component: {fileID: 1857681323}
   - component: {fileID: 1857681324}
+  - component: {fileID: 1857681323}
+  - component: {fileID: 1857681325}
+  - component: {fileID: 1857681327}
+  - component: {fileID: 1857681326}
+  - component: {fileID: 1857681328}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -1318,7 +1321,7 @@ Transform:
   m_GameObject: {fileID: 1857681318}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: 0.91, z: 12.63}
+  m_LocalPosition: {x: 0, y: 1.068, z: 12.63}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1333,20 +1336,15 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1857681318}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3c9e947cc26db2b4d9c4b56d3128e0b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 11495856}
-  moveSpeed: 3
-  detectionRange: 10
-  detectionAttackRange: 2
-  requestStayTime: 2
-  detectionTimer: 0
-  isFollowing: 0
-  headCanvas: {fileID: 2084215531}
-  barFill: {fileID: 1640113258}
+  moveSpeed: 2
+  attackStopRange: 1
+  stayTimer: {fileID: 1857681326}
 --- !u!54 &1857681324
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1394,6 +1392,58 @@ MonoBehaviour:
   eyePoint: {fileID: 1619320849}
   isPlayerInFOV: 0
   hasLineOfSight: 0
+  player: {fileID: 0}
+--- !u!114 &1857681326
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1857681318}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 002821a0313c5f145a87bb5a26cfe760, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hearingIncreaseSpeed: 0.25
+  visionIncreaseSpeed: 0.5
+  decreaseSpeed: 0.3
+  threshold: 1
+  alertValue: 0
+  isFollow: 0
+  hearing: {fileID: 1857681327}
+  vision: {fileID: 1857681325}
+--- !u!114 &1857681327
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1857681318}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bdfb54e48281d9b4d89f4643a53de889, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 11495856}
+  hearingRange: 3
+  isPlayerHeard: 0
+--- !u!114 &1857681328
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1857681318}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: deb65cb0c780e0d47b09b57b51de3f59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  headCanvas: {fileID: 2084215531}
+  filledImage: {fileID: 1640113258}
+  stayTimer: {fileID: 1857681326}
+  offset: {x: 0, y: 2, z: 0}
 --- !u!1 &1993703676
 GameObject:
   m_ObjectHideFlags: 0

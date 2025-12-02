@@ -1,92 +1,36 @@
+using System.Security.Cryptography;
 using UnityEditor.Timeline.Actions;
 using UnityEngine;
+using UnityEngine.AI;
 
-public class EnemyFollow: MonoBehaviour
+
+public class EnemyFollow : MonoBehaviour
 {
-    [Header("Player")]
-    public Transform player;// 玩家位置
-    
-    [Header("Enemy")]
-    public float moveSpeed;//move speed
+    [Header("Follow Settings")]
+    public Transform player;
+    public float moveSpeed;
+    public float attackStopRange;
 
-    [Header("Detection")]
-    public float detectionRange;// 检测范围
-    public float detectionAttackRange;
-    public float requestStayTime;
+    public EnemyStayTimer stayTimer; // 引用警戒值系统
 
-    public float detectionTimer;
-    public bool isFollowing;
-
-    [Header("UI")]
-    public Canvas headCanvas;
-    public UnityEngine.UI.Image barFill;
     void Update()
     {
-        float distance = Vector3.Distance(transform.position, player.position);
-            
-       if (distance <= detectionRange)// 玩家在范围内 → 开始计时
-       {
-          detectionTimer = Mathf.Clamp(detectionTimer + Time.deltaTime, 0f, requestStayTime);
+        if (!stayTimer.isFollow)
+            return;
 
-          if (detectionTimer >= requestStayTime)// 达到指定停留时间 → 开始追踪
-          {
-              isFollowing = true;
-          }
-       }
-       else
-       {
-            isFollowing = false;
-            detectionTimer = Mathf.Clamp(detectionTimer - Time.deltaTime, 0f, requestStayTime);
-       }
-        if (isFollowing)
-        {
-            EnemyFollowing();
-        }
+        float distance = (player.position - transform.position).magnitude;
 
-        UpdateDetectionUI();
+        if (distance <= attackStopRange)
+            return;
+
+        Vector3 dir = (player.position - transform.position).normalized;
+        transform.position += dir * moveSpeed * Time.deltaTime;
+        transform.LookAt(player);
     }
 
-    public void EnemyFollowing()
+    void OnDrawGizmosSelected()
     {
-        float distance = Vector3.Distance(transform.position, player.position);
-       
-            if (distance <= detectionAttackRange)
-            {
-                return;
-            }
-            Vector3 direction = (player.position - transform.position).normalized;
-            transform.position += direction * moveSpeed * Time.deltaTime;
-            transform.LookAt(player);
-       
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(transform.position, attackStopRange);
     }
-
-    void OnDrawGizmosSelected()//范围调试
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, detectionRange);
-        Gizmos.color = Color.blue;
-        Gizmos.DrawWireSphere(transform.position, detectionAttackRange);
-    }
-
-    void UpdateDetectionUI()
-    {
-        if (headCanvas == null || barFill == null)
-            return;//读条显示和隐藏
-
-        if (detectionTimer > 0)
-        {
-            if (!headCanvas.gameObject.activeSelf)
-                headCanvas.gameObject.SetActive(true);
-
-            barFill.fillAmount = detectionTimer / requestStayTime;
-        }
-        else
-        {
-            if (headCanvas.gameObject.activeSelf)
-                headCanvas.gameObject.SetActive(false);
-        }
-        headCanvas.transform.LookAt(Camera.main.transform);// 让读条一直朝向摄像机
-        headCanvas.transform.Rotate(0, 180, 0);
-    }
-
 }
