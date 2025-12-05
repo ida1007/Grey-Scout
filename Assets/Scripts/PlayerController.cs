@@ -57,7 +57,7 @@ public class PlayerController : MonoBehaviour
     }
 
     
-    // 角色移动（WASD）
+    // 角色移动
     void UpdateMovement()
     {
         float h = Input.GetAxis("Horizontal");
@@ -80,7 +80,7 @@ public class PlayerController : MonoBehaviour
 
         cc.Move(transform.forward * input.magnitude * speed * Time.deltaTime);
 
-        // 更新步伐进度（0~1）
+        // 更新步伐进度
         if (input.magnitude > 0.1f)
         {
             stepProgress += Time.deltaTime * stepSpeed;
@@ -93,7 +93,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // 腿的程序IK
+    // 腿程序IK
     void UpdateLegs()
     {
         UpdateSingleLeg(legLeft, L_legUpper, L_legLower, L_legFoot, currentLeg == 0, ref leftFootCurrent, ref leftFootTarget);
@@ -117,9 +117,7 @@ public class PlayerController : MonoBehaviour
         float stepLength = 0.3f;
         float stepHeight = 0.15f;
 
-        // ------------------------------------
-        // 1. 迈步脚：不断更新脚的目标
-        // ------------------------------------
+        // 更新脚的目标
         if (isStepping)
         {
             float forward = Mathf.Sin((step - 0.5f) * Mathf.PI) * stepLength;
@@ -132,30 +130,20 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            // ------------------------------------
-            // 2. 支撑脚：保持落地瞬间的位置，不动
-            // ------------------------------------
-
-            // 第一次初始化
+            //支撑脚：保持落地瞬间的位置，不动
+            // 初始化
             if (footCurrent == Vector3.zero)
                 footTarget = hipPos + transform.up * -1f;
         }
-
-        // ------------------------------------
-        // 3. 平滑移动脚（Stretchy）
-        // ------------------------------------
+        // 平滑移动脚
         footCurrent = Vector3.Lerp(footCurrent, footTarget, 15f * Time.deltaTime);
 
-        // ------------------------------------
-        // 4. 自动生成膝盖
-        // ------------------------------------
+        // 自动生成膝盖
         Vector3 kneePos =
             Vector3.Lerp(hipPos, footCurrent, 0.5f)
             + transform.forward * 0.2f;
 
-        // ------------------------------------
-        // 5. 绘制线段
-        // ------------------------------------
+        // 绘制线段
         upper.SetPosition(0, hipPos);
         upper.SetPosition(1, kneePos);
 
@@ -179,14 +167,10 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 s = shoulder.position;
 
-        // 控制摆动
-        float swing = Mathf.Sin((stepProgress + (direction == 1 ? 0 : 0.5f)) * Mathf.PI * 2f) * 0.3f;
-
-        // 手臂展开
-        float outward = 0.4f;
-
-        // 手臂抬起
-        float upward = 0.2f;
+        
+        float swing = Mathf.Sin((stepProgress + (direction == 1 ? 0 : 0.5f)) * Mathf.PI * 2f) * 0.3f;// 控制摆动
+        float outward = 0.4f;// 手臂展开
+        float upward = 0.2f;// 手臂抬起
 
         // 手部位置偏移
         Vector3 restOffset =
@@ -194,11 +178,8 @@ public class PlayerController : MonoBehaviour
             transform.up * upward +                   // 向上
             Vector3.down * 0.5f;                      // 向下挂着
 
-        // 最终手部位置
-        Vector3 hand = s + transform.forward * swing + restOffset;
-
-        // 肘部偏移
-        Vector3 elbow = (s + hand) * 0.5f + transform.forward * -0.15f;
+        Vector3 hand = s + transform.forward * swing + restOffset; // 最终手部位置
+        Vector3 elbow = (s + hand) * 0.5f + transform.forward * -0.15f; // 肘部偏移
 
         upper.SetPosition(0, s);
         upper.SetPosition(1, elbow);

@@ -70,8 +70,6 @@ public class EnemyVision : MonoBehaviour
     private void OnDrawGizmos()
     {
         if (eyePoint == null) return;
-
-        // FOV 扇形可视化
         Gizmos.color = Color.yellow;
         Vector3 eyePos = eyePoint.position;
 
@@ -81,13 +79,6 @@ public class EnemyVision : MonoBehaviour
         Gizmos.DrawLine(eyePos, eyePos + left * viewDistance);
         Gizmos.DrawLine(eyePos, eyePos + right * viewDistance);
         Gizmos.DrawLine(eyePos, eyePos + eyePoint.forward * viewDistance);
-
-        // 画射线
-        if (Application.isPlaying && player != null)
-        {
-            Gizmos.color = hasLineOfSight ? Color.green : Color.red;
-            Gizmos.DrawLine(eyePos, player.position);
-        }
     }
 #endif
 }

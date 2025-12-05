@@ -10,17 +10,14 @@ public class EnemyUI : MonoBehaviour
     public EnemyStayTimer stayTimer; // 警戒值系统
 
     [Header("UI Offset")]
-    public Vector3 offset = new Vector3(0, 2f, 0); // Canvas 相对于敌人头顶偏移
+    public Vector3 offset = new Vector3(0, 2f, 0); // Canvas相对于敌人头顶偏移
 
     void LateUpdate()
     {
         if (headCanvas != null)
         {
-            // 固定 Canvas 在敌人头顶
-            headCanvas.transform.position = transform.position + offset;
-
-            // 始终面向摄像机
-            Camera cam = Camera.main;
+            headCanvas.transform.position = transform.position + offset; // 固定 Canvas 在敌人头顶
+            Camera cam = Camera.main;// 始终面向摄像机
             if (cam != null)
             {
                 headCanvas.transform.LookAt(headCanvas.transform.position + cam.transform.forward);
@@ -29,8 +26,7 @@ public class EnemyUI : MonoBehaviour
 
         if (filledImage != null && stayTimer != null)
         {
-            // 更新圆形填充比例
-            filledImage.fillAmount = stayTimer.alertValue / stayTimer.threshold;
+            filledImage.fillAmount = stayTimer.alertValue / stayTimer.threshold; // 更新圆形填充比例
         }
     }
 }
