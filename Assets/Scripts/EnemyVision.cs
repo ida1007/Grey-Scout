@@ -41,7 +41,7 @@ public class EnemyVision : MonoBehaviour
         if (distance > viewDistance) // 超出视距
             return false;
         
-        float angle = Vector3.Angle(eyePoint.forward, dir);// 是否在视野角度内
+        float angle = Vector3.Angle(eyePoint.forward, dir); // 是否在视野角度内
         return angle <= fovAngle * 0.5f;
     }
 

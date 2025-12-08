@@ -2,6 +2,20 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("Leg Settings")]
+    public float legLength = 0.4f;
+    public float kneeRotation = 0.1f;
+    public float stepLength = 0.4f;
+    public float stepHeight = 0.15f;
+
+    [Header("Arm IK Settings")]
+    public float upperArmLength = 0.4f;
+    public float lowerArmLength = 0.4f;
+    public float elbowBendAmount = 0.15f;
+    public float armOutward = 0.4f;
+    public float armUpward = 0.2f;
+    public float armHang = 0.5f;
+
     [Header("Body References")]
     public Transform body;
     public Transform head;
@@ -32,6 +46,8 @@ public class PlayerController : MonoBehaviour
     public float walkSpeed = 2f;
     public float runSpeed = 5f;
 
+    public CameraFollow camFollow;
+
     private CharacterController cc;
     private float stepProgress = 0f;
     private float stepSpeed = 4f;
@@ -57,30 +73,30 @@ public class PlayerController : MonoBehaviour
     }
 
     
-    // 角色移动
+    //角色移动
     void UpdateMovement()
     {
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
 
         Vector3 input = new Vector3(h, 0, v);
-
+        //根据摄像机角度修正移动方向
+        Vector3 camForward = camFollow.camForward;
+        Vector3 camRight = camFollow.camRight;
+        Vector3 moveDir = camForward * v + camRight * h;
+        moveDir.y = 0;
+        moveDir.Normalize();
         // 转向
-        if (input.magnitude > 0.1f)
+        if (moveDir.sqrMagnitude > 0.001f)
         {
-            Vector3 lookDir = input.normalized;
-            transform.rotation = Quaternion.Lerp(
-                transform.rotation,
-                Quaternion.LookRotation(lookDir),
-                10f * Time.deltaTime
-            );
+            transform.rotation = Quaternion.LookRotation(moveDir);
         }
 
         float speed = Input.GetKey(KeyCode.LeftShift) ? runSpeed : walkSpeed;
 
-        cc.Move(transform.forward * input.magnitude * speed * Time.deltaTime);
+        cc.Move(moveDir * speed * Time.deltaTime);
 
-        // 更新步伐进度
+        // 步伐逻辑
         if (input.magnitude > 0.1f)
         {
             stepProgress += Time.deltaTime * stepSpeed;
@@ -88,7 +104,7 @@ public class PlayerController : MonoBehaviour
             if (stepProgress >= 1f)
             {
                 stepProgress = 0f;
-                currentLeg = 1 - currentLeg;  // 换腿
+                currentLeg = 1 - currentLeg;  //换腿
             }
         }
     }
@@ -114,8 +130,6 @@ public class PlayerController : MonoBehaviour
         Vector3 hipPos = hip.position;
 
         float step = stepProgress;
-        float stepLength = 0.3f;
-        float stepHeight = 0.15f;
 
         // 更新脚的目标
         if (isStepping)
@@ -126,24 +140,24 @@ public class PlayerController : MonoBehaviour
             footTarget =
                 hipPos
                 + transform.forward * forward
-                + transform.up * (-1f + up);
+                + transform.up * (-legLength + up);
         }
         else
         {
             //支撑脚：保持落地瞬间的位置，不动
-            // 初始化
+            //初始化
             if (footCurrent == Vector3.zero)
-                footTarget = hipPos + transform.up * -1f;
+                footTarget = hipPos + transform.up * -legLength;
         }
-        // 平滑移动脚
+        //平滑移动脚
         footCurrent = Vector3.Lerp(footCurrent, footTarget, 15f * Time.deltaTime);
 
-        // 自动生成膝盖
+        //自动生成膝盖
         Vector3 kneePos =
             Vector3.Lerp(hipPos, footCurrent, 0.5f)
-            + transform.forward * 0.2f;
+            + transform.forward * kneeRotation;
 
-        // 绘制线段
+        //绘制线段
         upper.SetPosition(0, hipPos);
         upper.SetPosition(1, kneePos);
 
@@ -167,24 +181,34 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 s = shoulder.position;
 
-        
-        float swing = Mathf.Sin((stepProgress + (direction == 1 ? 0 : 0.5f)) * Mathf.PI * 2f) * 0.3f;// 控制摆动
-        float outward = 0.4f;// 手臂展开
-        float upward = 0.2f;// 手臂抬起
+        // 让摆动速度跟腿相同
+        float swing = Mathf.Sin((stepProgress + (direction == 1 ? 0f : 0.5f)) * Mathf.PI * 2f) * 0.3f;
 
-        // 手部位置偏移
+        // 基础偏移，可调节
         Vector3 restOffset =
-            transform.right * outward * direction +  // 向外张开
-            transform.up * upward +                   // 向上
-            Vector3.down * 0.5f;                      // 向下挂着
+            transform.right * armOutward * direction +  // 左右展开
+            transform.up * armUpward +                 // 抬起一些
+            Vector3.down * armHang;                    // 下垂
 
-        Vector3 hand = s + transform.forward * swing + restOffset; // 最终手部位置
-        Vector3 elbow = (s + hand) * 0.5f + transform.forward * -0.15f; // 肘部偏移
+        Vector3 handTarget = s + transform.forward * swing + restOffset;
 
+        //计算肘部位置
+        Vector3 upperDir = (handTarget - s).normalized;
+        Vector3 elbow = s + upperDir * upperArmLength;
+
+        //可调弯曲程度
+        elbow += transform.forward * -elbowBendAmount;
+
+        //手的位置离肘部
+        Vector3 lowerDir = (handTarget - elbow).normalized;
+        Vector3 hand = elbow + lowerDir * lowerArmLength;
+
+        //上臂与前臂
         upper.SetPosition(0, s);
         upper.SetPosition(1, elbow);
 
         lower.SetPosition(0, elbow);
         lower.SetPosition(1, hand);
     }
+
 }

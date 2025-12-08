@@ -14,11 +14,19 @@ public class PlayerInteractor : MonoBehaviour
 
             if (distance <= interactRange)
             {
-                hostage.isHostageFollowing = !hostage.isHostageFollowing;
+                RescueHostage();
             }
         }
     }
 
+    void RescueHostage()
+    {
+        if (hostage.isHostageFollowing)
+            return;
+        hostage.isHostageFollowing = true;
+        HostageManager.Instance.hostageNum++;
+        HostageManager.Instance.followHostages.Add(hostage.gameObject);
+    }
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.green;

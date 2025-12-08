@@ -12,6 +12,7 @@ public class HostageFollow : MonoBehaviour
 
     void Start()
     {
+        HostageManager.Instance.followHostages.Add(this.gameObject);
         lastPlayerPos = player.position;
     }
 
@@ -45,5 +46,11 @@ public class HostageFollow : MonoBehaviour
                 transform.rotation = Quaternion.LookRotation(lookDir);
         }
         lastPlayerPos = player.position;
+    }
+
+    public void TeleportTo(Vector3 pos)
+    {
+        transform.position = pos;
+        gameObject.SetActive(true);
     }
 }
