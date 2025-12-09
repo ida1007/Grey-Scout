@@ -27,6 +27,10 @@ public class CameraFollow : MonoBehaviour
     private float moveX;
     private float moveY;
 
+    private void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+    }
 
     /*public Vector3 offset = new Vector3(0, 2, -5);
     public float smooth = 5f;
@@ -42,7 +46,7 @@ public class CameraFollow : MonoBehaviour
         */
         moveX += Input.GetAxis("Mouse X") * mouseSensitivityX * Time.deltaTime;
         moveY -= Input.GetAxis("Mouse Y") * mouseSensitivityY * Time.deltaTime;
-        moveX = Mathf.Clamp(moveX,minMoveX,maxMoveX);
+        //moveX = Mathf.Clamp(moveX,minMoveX,maxMoveX);
         moveY = Mathf.Clamp(moveY, minMoveY, maxMoveY);
 
         Quaternion rotation = Quaternion.Euler(moveY, moveX, 0);
@@ -50,7 +54,7 @@ public class CameraFollow : MonoBehaviour
         //玩家朝向同步
         Vector3 forward = rotation * Vector3.forward;
         forward.y = 0f;
-        target.forward = forward;
+        //target.forward = forward;
 
         //给玩家修正相机朝向
         camForward = forward.normalized;

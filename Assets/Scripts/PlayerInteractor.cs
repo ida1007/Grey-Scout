@@ -29,7 +29,7 @@ public class PlayerInteractor : MonoBehaviour
     }
     void OnDrawGizmosSelected()
     {
-        Gizmos.color = Color.green;
+        Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, interactRange);
     }
 }

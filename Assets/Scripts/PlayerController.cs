@@ -1,4 +1,6 @@
+using Unity.Android.Gradle.Manifest;
 using UnityEngine;
+using UnityEngine.InputSystem.XR;
 
 public class PlayerController : MonoBehaviour
 {
@@ -59,6 +61,9 @@ public class PlayerController : MonoBehaviour
     Vector3 leftFootTarget;
     Vector3 rightFootTarget;
 
+    float verticalVelocity = 0f;
+    float gravity = -10f;
+
 
     void Start()
     {
@@ -94,6 +99,17 @@ public class PlayerController : MonoBehaviour
 
         float speed = Input.GetKey(KeyCode.LeftShift) ? runSpeed : walkSpeed;
 
+        // 重力
+        if (cc.isGrounded)
+        {
+            verticalVelocity = -1f; // 保持贴地
+        }
+        else
+        {
+            verticalVelocity += gravity * Time.deltaTime;
+        }
+
+        moveDir.y = verticalVelocity;
         cc.Move(moveDir * speed * Time.deltaTime);
 
         // 步伐逻辑
