@@ -3,16 +3,20 @@ using UnityEngine;
 public class HostageFollow : MonoBehaviour
 {
     public Transform player;
-    [Header("Hostage")]
+    [Header("HostageFollow")]
     public bool isHostageFollowing; 
-    public float followDistance;
-    public float smoothSpeed;
+    public float followDistance = 2f;
+    public float smoothSpeed = 3f;
 
     private Vector3 lastPlayerPos;
+    void Awake()
+    {
+        if (player == null)
+            player = GameObject.FindGameObjectWithTag("Player")?.transform;
+    }
 
     void Start()
     {
-        HostageManager.Instance.followHostages.Add(this.gameObject);
         lastPlayerPos = player.position;
     }
 

@@ -1,35 +1,17 @@
 using UnityEngine;
 
-
 public class PlayerInteractor : MonoBehaviour
 {
-    public HostageFollow hostage;
-    public float interactRange;
+    public KeyCode interactKey = KeyCode.E;
+
+    // 当前在范围内、优先级最高的交互对象
+    public InteractableBase current;
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(interactKey) && current != null)
         {
-            float distance = Vector3.Distance(transform.position, hostage.transform.position);
-
-            if (distance <= interactRange)
-            {
-                RescueHostage();
-            }
+            current.Interact(this);
         }
-    }
-
-    void RescueHostage()
-    {
-        if (hostage.isHostageFollowing)
-            return;
-        hostage.isHostageFollowing = true;
-        HostageManager.Instance.hostageNum++;
-        HostageManager.Instance.followHostages.Add(hostage.gameObject);
-    }
-    void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, interactRange);
     }
 }

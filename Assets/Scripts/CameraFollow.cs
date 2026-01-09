@@ -18,8 +18,8 @@ public class CameraFollow : MonoBehaviour
     public float maxMoveY;
 
     [Header("Mouse Setting")]
-    public float mouseSensitivityX; //鼠标x轴灵敏度
-    public float mouseSensitivityY; //鼠标Y轴灵敏度
+    public float mouseSensitivityX; 
+    public float mouseSensitivityY; 
 
     [HideInInspector] public Vector3 camForward;
     [HideInInspector] public Vector3 camRight;
@@ -67,7 +67,6 @@ public class CameraFollow : MonoBehaviour
 
         //摄像机移动
         transform.position = Vector3.Lerp(transform.position,targetPos, followSpeed * Time.deltaTime);
-        Debug.Log("move!");
 
         //摄像机看向Player
         Quaternion lookRot = Quaternion.LookRotation(target.position + Vector3.up - transform.position);

@@ -1,0 +1,24 @@
+using UnityEngine;
+
+public class HostageInteractable : InteractableBase
+{
+    public HostageFollowNew hostage;
+
+    void Awake()
+    {
+        if (hostage == null) hostage = GetComponent<HostageFollowNew>();
+        promptText = "Press E to Rescue";
+    }
+
+    public override void Interact(PlayerInteractor player)
+    {
+        if (hostage == null) return;
+        if (hostage.isHostageFollowing) return;
+
+        hostage.isHostageFollowing = true;
+
+        HostageManager.Instance.hostageNum++;
+        if (!HostageManager.Instance.followHostages.Contains(hostage.gameObject))
+            HostageManager.Instance.followHostages.Add(hostage.gameObject);
+    }
+}

@@ -1,6 +1,5 @@
-using Unity.Android.Gradle.Manifest;
-using UnityEngine;
-using UnityEngine.InputSystem.XR;
+Ôªøusing UnityEngine;
+using UnityEngine.InputSystem; // ‚úÖ Input System
 
 public class PlayerController : MonoBehaviour
 {
@@ -55,125 +54,243 @@ public class PlayerController : MonoBehaviour
     private float stepSpeed = 4f;
     private int currentLeg = 0;
 
-    Vector3 leftFootCurrent;
-    Vector3 rightFootCurrent;
+    private Vector3 leftFootCurrent;
+    private Vector3 rightFootCurrent;
 
-    Vector3 leftFootTarget;
-    Vector3 rightFootTarget;
+    private Vector3 leftFootTarget;
+    private Vector3 rightFootTarget;
 
-    float verticalVelocity = 0f;
-    float gravity = -10f;
+    [Header("Gravity")]
+    private float verticalVelocity = 0f;
+    private float gravity = -10f;
 
+    // Crouch
+    [Header("Crouch Input (Input System)")]
+    public InputActionReference crouchAction;
+
+    [Header("Crouch Visuals")]
+    public float crouchLeanAngle = 35f;       // ÂâçÂÄæËßí
+    public float crouchBodyDown = 0.25f;      // Ë∫´‰Ωì‰∏ãÁßªÔºàbodyÊú¨Âú∞ÂùêÊ†áÔºâ
+    public float crouchLerp = 12f;            // ËøáÊ∏°ÈÄüÂ∫¶
+
+    [Header("Crouch Gameplay")]
+    public float crouchSpeedMul = 0.55f;      // Ëπ≤‰∏ãÈÄüÂ∫¶ÂÄçÁéá
+    public float crouchLegMul = 0.70f;        // ËÖøÂèòÁü≠ÂÄçÁéá
+    public float crouchStepLenMul = 0.65f;    // Ê≠•ÂπÖÂÄçÁéá
+    public float crouchStepHeightMul = 0.60f; // Êä¨ËÑöÂÄçÁéá
+
+    [Header("CharacterController Crouch (Recommended)")]
+    public bool adjustControllerOnCrouch = true;
+    public float crouchHeight = 1.2f;
+    public float crouchCenterY = 0.6f;
+
+    private bool isCrouching = false;
+    private float crouch01 = 0f;
+    private Quaternion bodyBaseLocalRot;
+    private Vector3 bodyBaseLocalPos;
+
+    private float standHeight;
+    private Vector3 standCenter;
+
+    public bool IsCrouching => isCrouching;
+    public bool IsRunning { get; private set; }
+    public float HorizontalSpeed { get; private set; }
+
+    void Awake()
+    {
+        cc = GetComponent<CharacterController>();
+    }
 
     void Start()
     {
-        cc = GetComponent<CharacterController>();
+        if (body != null)
+        {
+            bodyBaseLocalRot = body.localRotation;
+            bodyBaseLocalPos = body.localPosition;
+        }
+
+        if (cc != null)
+        {
+            standHeight = cc.height;
+            standCenter = cc.center;
+        }
+    }
+
+    void OnEnable()
+    {
+        //‰∫ã‰ª∂ÊñπÂºèÔºöperformed=Êåâ‰∏ã, canceled=ÊùæÂºÄ
+        if (crouchAction != null && crouchAction.action != null)
+        {
+            crouchAction.action.performed += OnCrouchPerformed;
+            crouchAction.action.canceled += OnCrouchCanceled;
+            crouchAction.action.Enable();
+        }
+    }
+
+    void OnDisable()
+    {
+        if (crouchAction != null && crouchAction.action != null)
+        {
+            crouchAction.action.performed -= OnCrouchPerformed;
+            crouchAction.action.canceled -= OnCrouchCanceled;
+            crouchAction.action.Disable();
+        }
+    }
+
+    private void OnCrouchPerformed(InputAction.CallbackContext _)
+    {
+        isCrouching = true;  // Êåâ‰∏ã -> Ëπ≤
+    }
+
+    private void OnCrouchCanceled(InputAction.CallbackContext _)
+    {
+        isCrouching = false; // ÊùæÂºÄ -> Á´ô
     }
 
     void Update()
     {
         UpdateMovement();
+        UpdateCrouchVisuals();
         UpdateLegs();
         UpdateArms();
     }
 
-    
-    //Ω«…´“∆∂Ø
     void UpdateMovement()
     {
+        // ËøôÈáå‰ªçÊ≤øÁî®‰Ω†ÁöÑËÄÅËæìÂÖ•ÁßªÂä®ÔºàWASDÔºâ
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
 
         Vector3 input = new Vector3(h, 0, v);
-        //∏˘æ›…„œÒª˙Ω«∂»–ﬁ’˝“∆∂Ø∑ΩœÚ
+
+        // Áõ∏Êú∫Áõ∏ÂØπÁßªÂä®
         Vector3 camForward = camFollow.camForward;
         Vector3 camRight = camFollow.camRight;
+
         Vector3 moveDir = camForward * v + camRight * h;
-        moveDir.y = 0;
-        moveDir.Normalize();
-        // ◊™œÚ
+        moveDir.y = 0f;
+
+        if (moveDir.sqrMagnitude > 0.0001f)
+            moveDir.Normalize();
+
         if (moveDir.sqrMagnitude > 0.001f)
-        {
             transform.rotation = Quaternion.LookRotation(moveDir);
-        }
 
-        float speed = Input.GetKey(KeyCode.LeftShift) ? runSpeed : walkSpeed;
+        // ÈÄüÂ∫¶ÔºöËπ≤‰∏ãÁ¶ÅË∑ë + Êõ¥ÊÖ¢
+        bool wantsRun = Input.GetKey(KeyCode.LeftShift);
+        if (isCrouching) wantsRun = false;
 
-        // ÷ÿ¡¶
+        IsRunning = wantsRun;
+
+        float baseSpeed = wantsRun ? runSpeed : walkSpeed;
+        float speed = isCrouching ? baseSpeed * crouchSpeedMul : baseSpeed;
+
+        // ÈáçÂäõ
         if (cc.isGrounded)
-        {
-            verticalVelocity = -1f; // ±£≥÷Ã˘µÿ
-        }
+            verticalVelocity = -1f;
         else
-        {
             verticalVelocity += gravity * Time.deltaTime;
-        }
 
         moveDir.y = verticalVelocity;
         cc.Move(moveDir * speed * Time.deltaTime);
 
-        // ≤Ω∑•¬ﬂº≠
+        Vector3 vel = cc.velocity;
+        vel.y = 0f;
+        HorizontalSpeed = vel.magnitude;
+        // Ê≠•‰ºêÔºàËπ≤‰∏ãÊõ¥ÊÖ¢Ôºâ
+        float stepSpeedMul = isCrouching ? 0.75f : 1f;
+
         if (input.magnitude > 0.1f)
         {
-            stepProgress += Time.deltaTime * stepSpeed;
-
+            stepProgress += Time.deltaTime * stepSpeed * stepSpeedMul;
             if (stepProgress >= 1f)
             {
                 stepProgress = 0f;
-                currentLeg = 1 - currentLeg;  //ªªÕ»
+                currentLeg = 1 - currentLeg;
             }
+        }
+        else
+        {
+            stepProgress = Mathf.Lerp(stepProgress, 0f, 10f * Time.deltaTime);
         }
     }
 
-    // Õ»≥Ã–ÚIK
+    void UpdateCrouchVisuals()
+    {
+        float target = isCrouching ? 1f : 0f;
+        crouch01 = Mathf.Lerp(crouch01, target, crouchLerp * Time.deltaTime);
+
+        if (body != null)
+        {
+            // ÂâçÂÄæ
+            Quaternion lean = Quaternion.Euler(crouchLeanAngle * crouch01, 0f, 0f);
+            body.localRotation = Quaternion.Slerp(body.localRotation, bodyBaseLocalRot * lean, crouchLerp * Time.deltaTime);
+
+            // ‰∏ãÁßª
+            Vector3 downPos = bodyBaseLocalPos + Vector3.down * (crouchBodyDown * crouch01);
+            body.localPosition = Vector3.Lerp(body.localPosition, downPos, crouchLerp * Time.deltaTime);
+        }
+
+        // Êé®ËçêÔºöÊéßÂà∂Âô®‰πüËπ≤‰∏ã
+        if (adjustControllerOnCrouch && cc != null)
+        {
+            float targetH = Mathf.Lerp(standHeight, crouchHeight, crouch01);
+            float targetCY = Mathf.Lerp(standCenter.y, crouchCenterY, crouch01);
+
+            cc.height = Mathf.Lerp(cc.height, targetH, crouchLerp * Time.deltaTime);
+
+            Vector3 c = cc.center;
+            c.y = Mathf.Lerp(c.y, targetCY, crouchLerp * Time.deltaTime);
+            cc.center = c;
+        }
+    }
+
     void UpdateLegs()
     {
         UpdateSingleLeg(legLeft, L_legUpper, L_legLower, L_legFoot, currentLeg == 0, ref leftFootCurrent, ref leftFootTarget);
         UpdateSingleLeg(legRight, R_legUpper, R_legLower, R_legFoot, currentLeg == 1, ref rightFootCurrent, ref rightFootTarget);
     }
 
-
     void UpdateSingleLeg(
-    Transform hip,
-    LineRenderer upper,
-    LineRenderer lower,
-    LineRenderer foot,
-    bool isStepping,
-    ref Vector3 footCurrent,
-    ref Vector3 footTarget
-)
+        Transform hip,
+        LineRenderer upper,
+        LineRenderer lower,
+        LineRenderer foot,
+        bool isStepping,
+        ref Vector3 footCurrent,
+        ref Vector3 footTarget
+    )
     {
         Vector3 hipPos = hip.position;
-
         float step = stepProgress;
 
-        // ∏¸–¬Ω≈µƒƒø±Í
+        // Ëπ≤‰∏ãÊó∂ËÖøÂèòÁü≠„ÄÅÊ≠•ÂπÖÂèòÂ∞è„ÄÅÊä¨ËÑöÂèò‰ΩéÔºàÂπ≥ÊªëÔºâ
+        float legLen = Mathf.Lerp(legLength, legLength * crouchLegMul, crouch01);
+        float sLen = Mathf.Lerp(stepLength, stepLength * crouchStepLenMul, crouch01);
+        float sHeight = Mathf.Lerp(stepHeight, stepHeight * crouchStepHeightMul, crouch01);
+
         if (isStepping)
         {
-            float forward = Mathf.Sin((step - 0.5f) * Mathf.PI) * stepLength;
-            float up = Mathf.Cos((step - 0.5f) * Mathf.PI) * stepHeight;
+            float forward = Mathf.Sin((step - 0.5f) * Mathf.PI) * sLen;
+            float up = Mathf.Cos((step - 0.5f) * Mathf.PI) * sHeight;
 
             footTarget =
                 hipPos
                 + transform.forward * forward
-                + transform.up * (-legLength + up);
+                + transform.up * (-legLen + up);
         }
         else
         {
-            //÷ß≥≈Ω≈£∫±£≥÷¬‰µÿÀ≤º‰µƒŒª÷√£¨≤ª∂Ø
-            //≥ı ºªØ
             if (footCurrent == Vector3.zero)
-                footTarget = hipPos + transform.up * -legLength;
+                footTarget = hipPos + transform.up * -legLen;
         }
-        //∆Ωª¨“∆∂ØΩ≈
+
         footCurrent = Vector3.Lerp(footCurrent, footTarget, 15f * Time.deltaTime);
 
-        //◊‘∂Ø…˙≥…œ•∏«
         Vector3 kneePos =
             Vector3.Lerp(hipPos, footCurrent, 0.5f)
             + transform.forward * kneeRotation;
 
-        //ªÊ÷∆œﬂ∂Œ
         upper.SetPosition(0, hipPos);
         upper.SetPosition(1, kneePos);
 
@@ -184,9 +301,6 @@ public class PlayerController : MonoBehaviour
         foot.SetPosition(1, footCurrent + transform.forward * 0.15f);
     }
 
-
-
-    //  ÷±€∞⁄∂Ø
     void UpdateArms()
     {
         UpdateSingleArm(armLeft, L_armUpper, L_armLower, -1);
@@ -197,34 +311,26 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 s = shoulder.position;
 
-        // »√∞⁄∂ØÀŸ∂»∏˙Õ»œ‡Õ¨
         float swing = Mathf.Sin((stepProgress + (direction == 1 ? 0f : 0.5f)) * Mathf.PI * 2f) * 0.3f;
 
-        // ª˘¥°∆´“∆£¨ø…µ˜Ω⁄
         Vector3 restOffset =
-            transform.right * armOutward * direction +  // ◊Û”“’πø™
-            transform.up * armUpward +                 // Ãß∆“ª–©
-            Vector3.down * armHang;                    // œ¬¥π
+            transform.right * armOutward * direction +
+            transform.up * armUpward +
+            Vector3.down * armHang;
 
         Vector3 handTarget = s + transform.forward * swing + restOffset;
 
-        //º∆À„÷‚≤øŒª÷√
         Vector3 upperDir = (handTarget - s).normalized;
         Vector3 elbow = s + upperDir * upperArmLength;
-
-        //ø…µ˜Õ‰«˙≥Ã∂»
         elbow += transform.forward * -elbowBendAmount;
 
-        // ÷µƒŒª÷√¿Î÷‚≤ø
         Vector3 lowerDir = (handTarget - elbow).normalized;
         Vector3 hand = elbow + lowerDir * lowerArmLength;
 
-        //…œ±€”Î«∞±€
         upper.SetPosition(0, s);
         upper.SetPosition(1, elbow);
 
         lower.SetPosition(0, elbow);
         lower.SetPosition(1, hand);
     }
-
 }
