@@ -6,8 +6,12 @@ public class EnemyFollow : MonoBehaviour
 {
     [Header("Follow Settings")]
     public Transform player;
-    public float moveSpeed;
+    public float moveSpeed = 6f;
+
+    [Header("Attract Setting")]
+    public bool isAttacking;
     public float attackStopRange = 1.8f;
+    public float attackExitRange = 2.2f;
 
     [Header("Return Settings")]
     public float returnStopRange = 0.3f;
@@ -25,23 +29,39 @@ public class EnemyFollow : MonoBehaviour
             player = GameObject.FindGameObjectWithTag("Player")?.transform;
 
         agent = GetComponent<NavMeshAgent>();
-
-        // 用你自己的 LookRotation（只转Y），所以关掉Agent自动旋转
         agent.updateRotation = false;
-
-        // 让 Agent 自己更新位置（默认true）
         agent.updatePosition = true;
 
-        // 让停止距离等于攻击停下距离（也可以分开）
+        agent.speed = moveSpeed;
         agent.stoppingDistance = attackStopRange;
     }
     void Update()
     {
         if (stayTimer == null || player == null || agent == null) return;
 
+        if (!stayTimer.isFollow) isAttacking = false;
+
         if (stayTimer.isFollow)
         {
-            //return;
+            float dist = FlatDistance(transform.position, player.position);
+
+            if (!isAttacking)
+            {
+                if (dist <= attackExitRange) isAttacking = true;
+            }
+            else
+            {
+                if (dist > attackExitRange) isAttacking = false;
+            }
+
+            // enter attack range
+            if (dist <= attackStopRange)
+            {
+                agent.isStopped = true;
+                FaceTo(player.position);
+                return;
+            }
+
             agent.isStopped = false;
             agent.stoppingDistance = attackStopRange;
             agent.SetDestination(player.position);
@@ -53,6 +73,8 @@ public class EnemyFollow : MonoBehaviour
         // return
         if (stayTimer.isReturning)
         {
+            isAttacking = false; 
+
             agent.isStopped = false;
             agent.stoppingDistance = returnStopRange;
             agent.SetDestination(startPos);
@@ -70,6 +92,7 @@ public class EnemyFollow : MonoBehaviour
         }
 
         // waiting
+        isAttacking = false;
         agent.isStopped = true;
         FaceMoveDirection(agent.velocity);
 
@@ -83,11 +106,13 @@ public class EnemyFollow : MonoBehaviour
         {
             transform.rotation = Quaternion.LookRotation(dir);
         }
-        else
-        {
-            // 如果 velocity 很小（刚停下），也可以选择朝向玩家/朝向家
-            // 不需要就留空
-        }
+    }
+
+    private void FaceTo(Vector3 worldPos)
+    {
+        Vector3 dir = worldPos - transform.position; dir.y = 0f;
+        if (dir.sqrMagnitude > 0.001f)
+            transform.rotation = Quaternion.LookRotation(dir);
     }
 
     private float FlatDistance(Vector3 a, Vector3 b)
@@ -100,5 +125,8 @@ public class EnemyFollow : MonoBehaviour
     {
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, attackStopRange);
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, attackExitRange);
     }
 }

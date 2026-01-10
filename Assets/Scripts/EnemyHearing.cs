@@ -4,7 +4,7 @@ public class EnemyHearing : MonoBehaviour
 {
     [Header("Hearing Settings")]
     public Transform player;
-    public float hearingRange;
+    public float hearingRange = 5f;
 
     public bool isPlayerHeard;
 

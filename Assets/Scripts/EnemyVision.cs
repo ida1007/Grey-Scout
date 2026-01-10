@@ -56,19 +56,7 @@ public class EnemyVision : MonoBehaviour
         Vector3 target = player.position + Vector3.up * 1.2f;
         Vector3 direction = (target - origin).normalized;
         float distance = Vector3.Distance(origin, target);
-        //RaycastHit hit;
-
-        //if (Physics.Raycast(origin, direction, out hit, distance))// 发射射线，获取第一个命中的对象
-        //{
-        //    Transform hitObj = hit.transform;
-
-        //    if (hitObj.CompareTag("Player"))
-        //    {
-        //        return true;
-        //    }
-        //    return false;
-        //}
-        //return false;
+        
         if (Physics.Raycast(origin, direction, distance, obstacleMask))
             return false;
 

@@ -21,7 +21,7 @@ public class EnemyStayTimer : MonoBehaviour
     public EnemyVision vision;
 
     private float waitTimer;
-    private bool hasEverAlerted;
+    private bool hasChasedOnce;
 
     void Update()
     {
@@ -44,20 +44,27 @@ public class EnemyStayTimer : MonoBehaviour
             }
             if (isReturning) isReturning = false;
 
-            hasEverAlerted = true;
             alertValue = Mathf.Clamp(alertValue + increase, 0f, threshold);
 
             //isFollow
             if (alertValue >= threshold)
+            {
                 isFollow = true;
+                hasChasedOnce = true;
+            }
+                
         }
         else
         {
             alertValue = Mathf.Clamp(alertValue - decreaseSpeed * Time.deltaTime, 0f, threshold);
+
+            if (alertValue < threshold)
+                isFollow = false;
         }
 
         if (isWaiting)
         {
+            isFollow = false;
             waitTimer -= Time.deltaTime;
             if (waitTimer <= 0)
             {
@@ -70,7 +77,7 @@ public class EnemyStayTimer : MonoBehaviour
         if (isReturning)
             return;
 
-        if (hasEverAlerted && isFollow && alertValue <= 0f)
+        if (hasChasedOnce && alertValue <= 0f && !isWaiting && !isReturning)
         {
             isFollow = false;
             isWaiting = true;
@@ -86,7 +93,7 @@ public class EnemyStayTimer : MonoBehaviour
 
         alertValue = 0f;
         waitTimer = 0f;
-        hasEverAlerted = false;
+        hasChasedOnce = false;
     }
 }
 

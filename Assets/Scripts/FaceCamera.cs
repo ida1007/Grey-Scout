@@ -3,6 +3,8 @@ using UnityEngine;
 public class FaceCamera : MonoBehaviour
 {
     public Camera cam;
+    public GameObject player;
+
 
     void Start()
     {

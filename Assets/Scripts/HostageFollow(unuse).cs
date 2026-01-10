@@ -57,10 +57,4 @@ public class HostageFollow : MonoBehaviour
         }
         lastPlayerPos = player.position;
     }
-
-    public void TeleportTo(Vector3 pos)
-    {
-        transform.position = pos;
-        gameObject.SetActive(true);
-    }
 }
