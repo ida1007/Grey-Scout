@@ -15,10 +15,13 @@ public class HostageInteractable : InteractableBase
         if (hostage == null) return;
         if (hostage.isHostageFollowing) return;
 
+        hostage.followTarget = HostageManager.Instance.GetLastHostage();
+
+        if (hostage.followTarget != null) hostage.lastTargetPos = hostage.followTarget.position;
+
         hostage.isHostageFollowing = true;
 
-        HostageManager.Instance.hostageNum++;
-        if (!HostageManager.Instance.followHostages.Contains(hostage.gameObject))
-            HostageManager.Instance.followHostages.Add(hostage.gameObject);
+
+        HostageManager.Instance.AddRescuedHostage(hostage.gameObject);
     }
 }

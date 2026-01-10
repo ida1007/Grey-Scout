@@ -35,6 +35,7 @@ public class EnemyVision : MonoBehaviour
 
     private bool CheckFOV()
     {
+
         Vector3 dir = player.position - eyePoint.position;
         float distance = dir.magnitude;
 

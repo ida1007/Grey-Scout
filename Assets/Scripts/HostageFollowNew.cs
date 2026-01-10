@@ -2,7 +2,9 @@
 
 public class HostageFollowNew: MonoBehaviour
 {
+    [Header("Chain Follow")]
     public Transform player;
+    public Transform followTarget;
 
     [Header("HostageFollow")]
     public bool isHostageFollowing;
@@ -92,7 +94,7 @@ public class HostageFollowNew: MonoBehaviour
     private float verticalVelocity = 0f;
 
     private CharacterController cc;
-    private Vector3 lastPlayerPos;
+    public Vector3 lastTargetPos;
 
     private Vector3 horizontalVel = Vector3.zero;
 
@@ -105,11 +107,15 @@ public class HostageFollowNew: MonoBehaviour
 
         if (player3C == null && player != null)
             player3C = player.GetComponent<PlayerController>();
+
     }
 
     void Start()
     {
-        if (player != null) lastPlayerPos = player.position;
+        if (followTarget == null)
+           followTarget = HostageManager.Instance.GetLastHostage();
+
+        if (followTarget != null) lastTargetPos = followTarget.position;
 
         if (body != null)
         {
@@ -124,7 +130,7 @@ public class HostageFollowNew: MonoBehaviour
         bool playerCrouch = (player3C != null) && player3C.IsCrouching;
         bool playerRun = (player3C != null) && player3C.IsRunning;
 
-        // 始终更新重力（就算不跟随也要落地）
+        // update gravity
         Vector3 displacement = Vector3.zero;
         ApplyGravity(ref displacement);
 
@@ -139,18 +145,18 @@ public class HostageFollowNew: MonoBehaviour
             UpdateLegs();
             UpdateArms();
 
-            if (player != null) lastPlayerPos = player.position;
+            if (followTarget != null) lastTargetPos = followTarget.position;
             return;
         }
 
         // move direction
-        Vector3 playerMoveDir = player.position - lastPlayerPos;
-        playerMoveDir.y = 0f;
+        Vector3 targetMoveDir = followTarget.position - lastTargetPos;
+        targetMoveDir.y = 0f;
 
-        if (playerMoveDir.sqrMagnitude > 0.0001f) 
-            playerMoveDir.Normalize();
+        if (targetMoveDir.sqrMagnitude > 0.0001f)
+            targetMoveDir.Normalize();
 
-        Vector3 targetPos = player.position - playerMoveDir * followDistance;
+        Vector3 targetPos = followTarget.position - targetMoveDir * followDistance;
         //targetPos.y = transform.position.y;
         Vector3 toTarget = targetPos - transform.position;
         toTarget.y = 0f;
@@ -165,15 +171,17 @@ public class HostageFollowNew: MonoBehaviour
         //        smoothSpeed * Time.deltaTime
         //    );
         //}
-        float distToPlayer = Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z),
-                                              new Vector3(player.position.x, 0, player.position.z));
+        float distToTarget = Vector3.Distance(
+            new Vector3(transform.position.x, 0, transform.position.z),
+            new Vector3(followTarget.position.x, 0, followTarget.position.z)
+            );
 
         Vector3 desiredHorizontalVel = Vector3.zero;
-        if (distToPlayer > followDistance)
+        if (distToTarget > followDistance)
         {
             Vector3 dir = toTarget.sqrMagnitude > 0.0001f ? toTarget.normalized : Vector3.zero;
 
-            float t = Mathf.InverseLerp(followDistance, followDistance + 2.0f, distToPlayer);
+            float t = Mathf.InverseLerp(followDistance, followDistance + 2.0f, distToTarget);
             float spd = Mathf.Lerp(0.0f, followSpeed, t);
 
             desiredHorizontalVel = dir * spd;
@@ -184,17 +192,17 @@ public class HostageFollowNew: MonoBehaviour
 
         displacement += horizontalVel * Time.deltaTime;
 
-        // Move：一次性把水平 + 重力一起走
+        // Move Verizontal & Gravity
         cc.Move(displacement);
 
         // face player
-        Vector3 lookDir = player.position - transform.position;
+        Vector3 lookDir = followTarget.position - transform.position;
         lookDir.y = 0f;
         if (lookDir.sqrMagnitude > 0.0001f)
             transform.rotation = Quaternion.LookRotation(lookDir);
 
         // upload lastPlayerPos
-        lastPlayerPos = player.position;
+        lastTargetPos = followTarget.position;
 
         // 4) 动画切换依据：玩家速度（优先用玩家 HorizontalSpeed；没有就用玩家位移估算）
         float playerHorizontalSpeed = 0f;

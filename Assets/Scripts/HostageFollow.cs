@@ -2,7 +2,9 @@ using UnityEngine;
 
 public class HostageFollow : MonoBehaviour
 {
+    [Header("Chain Follow")]
     public Transform player;
+    public Transform followTarget;
     [Header("HostageFollow")]
     public bool isHostageFollowing; 
     public float followDistance = 2f;
@@ -13,11 +15,15 @@ public class HostageFollow : MonoBehaviour
     {
         if (player == null)
             player = GameObject.FindGameObjectWithTag("Player")?.transform;
+
+        if (followTarget == null)
+            followTarget = player;
     }
 
     void Start()
     {
-        lastPlayerPos = player.position;
+        if (followTarget != null)
+            lastPlayerPos = player.position;
     }
 
     void Update()
