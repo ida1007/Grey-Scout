@@ -62,7 +62,7 @@ Material:
     - _QueueControl: 0
     - _QueueOffset: 0
     - _WindSpeed: 1
-    - _WindStrenth: 0.3
+    - _WindStrenth: 0.5
     - _max: 0.1
     - _min: 1
     - _shades: 0.5

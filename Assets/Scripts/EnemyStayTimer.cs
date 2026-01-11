@@ -95,5 +95,28 @@ public class EnemyStayTimer : MonoBehaviour
         waitTimer = 0f;
         hasChasedOnce = false;
     }
+
+    public void ApplyDuckAlertJump()
+    {
+        float half = threshold * 0.5f;
+
+        if (isWaiting)
+        {
+            isWaiting = false;
+            waitTimer = 0f;
+        }
+        if (isReturning) isReturning = false;
+
+        if (alertValue >= half) return;
+
+        alertValue = Mathf.Clamp(alertValue + half, 0f, threshold);
+
+        if (alertValue >= threshold)
+        {
+            isFollow = true;
+            hasChasedOnce = true;
+        }
+    }
+
 }
 

@@ -1311,9 +1311,9 @@ GameObject:
   m_Component:
   - component: {fileID: 8338432179525113133}
   - component: {fileID: 7674713902618553091}
+  - component: {fileID: 4328125842100943726}
   - component: {fileID: 9016314468927028745}
   - component: {fileID: 6168175967769355871}
-  - component: {fileID: 4661729427113363550}
   - component: {fileID: 1552450921714825619}
   - component: {fileID: 1631605812548193125}
   - component: {fileID: 5255540493086887956}
@@ -1379,6 +1379,31 @@ CharacterController:
   m_SkinWidth: 0.02
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0.93, z: 0}
+--- !u!114 &4328125842100943726
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4532614160171631545}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5a7971cc2095094ea10e1a7b472fa7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 0}
+  stayTimer: {fileID: 1631605812548193125}
+  agent: {fileID: 8264583601000509743}
+  moveSpeed: 4
+  isAttacking: 0
+  attackStopRange: 1.8
+  attackExitRange: 2.2
+  returnStopRange: 0.3
+  investigateArriveDistance: 1.2
+  investigateStopSeconds: 3
+  repathInterval: 0.25
+  isInvestigating: 0
+  investigatePos: {x: 0, y: 0, z: 0}
 --- !u!114 &9016314468927028745
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1391,9 +1416,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdfb54e48281d9b4d89f4643a53de889, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minHearingRange: 2
+  maxHearingRange: 7
+  hearingLerp: 10
+  duckRange: 15
+  duckHeardMemory: 1.2
   player: {fileID: 0}
-  hearingRange: 5
+  playerCtrl: {fileID: 0}
+  stayTimer: {fileID: 1631605812548193125}
+  mover: {fileID: 4328125842100943726}
   isPlayerHeard: 0
+  lastHeardPos: {x: 0, y: 0, z: 0}
+  currentHearingRange: 0
 --- !u!114 &6168175967769355871
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1407,7 +1441,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   viewDistance: 10
-  fovAngle: 80
+  fovAngle: 70
   obstacleMask:
     serializedVersion: 2
     m_Bits: 8
@@ -1415,25 +1449,6 @@ MonoBehaviour:
   isPlayerInFOV: 0
   hasLineOfSight: 0
   player: {fileID: 0}
---- !u!114 &4661729427113363550
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4532614160171631545}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3c9e947cc26db2b4d9c4b56d3128e0b0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  player: {fileID: 0}
-  moveSpeed: 6
-  isAttacking: 0
-  attackStopRange: 1.8
-  attackExitRange: 2.2
-  returnStopRange: 0.3
-  stayTimer: {fileID: 1631605812548193125}
 --- !u!114 &1552450921714825619
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1486,7 +1501,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agent: {fileID: 8264583601000509743}
-  follow: {fileID: 0}
+  mover: {fileID: 0}
   legLength: 0.6
   kneeRotation: 0.1
   stepLength: 0.6
@@ -1813,6 +1828,7 @@ GameObject:
   - component: {fileID: 8381305539921960346}
   - component: {fileID: 8088066170665846497}
   - component: {fileID: 1856789740395452865}
+  - component: {fileID: 4957366252743244614}
   m_Layer: 0
   m_Name: Spear
   m_TagString: Untagged
@@ -1911,6 +1927,18 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
+--- !u!114 &4957366252743244614
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6615768473660403190}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1cf5e149f8204f84b849be5806095523, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6927108362289242948
 GameObject:
   m_ObjectHideFlags: 0
@@ -1976,7 +2004,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: -2413806693520163455, guid: 2ad80690cb4b2b74a88e3005e8931df4, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2617,7 +2645,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 23
+  m_VersionIndex: 44
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -3224,14 +3252,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0.98209995, b: 0, a: 1}
+  m_Color: {r: 1, g: 0.9799185, b: 0.25943398, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: -2413806693520163455, guid: 2ad80690cb4b2b74a88e3005e8931df4, type: 3}
   m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1

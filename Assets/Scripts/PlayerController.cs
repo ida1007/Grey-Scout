@@ -1,8 +1,11 @@
 ﻿using UnityEngine;
-using UnityEngine.InputSystem; // ✅ Input System
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("Audio")]
+    public FootstepAudio footstep;
+
     [Header("Leg Settings")]
     public float legLength = 0.4f;
     public float kneeRotation = 0.1f;
@@ -69,15 +72,15 @@ public class PlayerController : MonoBehaviour
     public InputActionReference crouchAction;
 
     [Header("Crouch Visuals")]
-    public float crouchLeanAngle = 35f;       // 前倾角
-    public float crouchBodyDown = 0.25f;      // 身体下移（body本地坐标）
-    public float crouchLerp = 12f;            // 过渡速度
+    public float crouchLeanAngle = 35f;       
+    public float crouchBodyDown = 0.25f;      
+    public float crouchLerp = 12f;            
 
     [Header("Crouch Gameplay")]
-    public float crouchSpeedMul = 0.55f;      // 蹲下速度倍率
-    public float crouchLegMul = 0.70f;        // 腿变短倍率
-    public float crouchStepLenMul = 0.65f;    // 步幅倍率
-    public float crouchStepHeightMul = 0.60f; // 抬脚倍率
+    public float crouchSpeedMul = 0.55f;      
+    public float crouchLegMul = 0.70f;        
+    public float crouchStepLenMul = 0.65f;    
+    public float crouchStepHeightMul = 0.60f; 
 
     [Header("CharacterController Crouch (Recommended)")]
     public bool adjustControllerOnCrouch = true;
@@ -95,6 +98,17 @@ public class PlayerController : MonoBehaviour
     public bool IsCrouching => isCrouching;
     public bool IsRunning { get; private set; }
     public float HorizontalSpeed { get; private set; }
+
+    public enum PlayerMoveState
+    {
+        Idle,
+        CrouchWalk,
+        Walk,
+        Run
+    }
+
+    public PlayerMoveState MoveState { get; private set; }
+    public float Noise01 { get; private set; }
 
     void Awake()
     {
@@ -139,12 +153,12 @@ public class PlayerController : MonoBehaviour
 
     private void OnCrouchPerformed(InputAction.CallbackContext _)
     {
-        isCrouching = true;  // 按下 -> 蹲
+        isCrouching = true;  
     }
 
     private void OnCrouchCanceled(InputAction.CallbackContext _)
     {
-        isCrouching = false; // 松开 -> 站
+        isCrouching = false; 
     }
 
     void Update()
@@ -157,13 +171,13 @@ public class PlayerController : MonoBehaviour
 
     void UpdateMovement()
     {
-        // 这里仍沿用你的老输入移动（WASD）
+        // WASD
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
 
         Vector3 input = new Vector3(h, 0, v);
 
-        // 相机相对移动
+        // camera
         Vector3 camForward = camFollow.camForward;
         Vector3 camRight = camFollow.camRight;
 
@@ -176,7 +190,7 @@ public class PlayerController : MonoBehaviour
         if (moveDir.sqrMagnitude > 0.001f)
             transform.rotation = Quaternion.LookRotation(moveDir);
 
-        // 速度：蹲下禁跑 + 更慢
+        // v chrouch
         bool wantsRun = Input.GetKey(KeyCode.LeftShift);
         if (isCrouching) wantsRun = false;
 
@@ -185,7 +199,7 @@ public class PlayerController : MonoBehaviour
         float baseSpeed = wantsRun ? runSpeed : walkSpeed;
         float speed = isCrouching ? baseSpeed * crouchSpeedMul : baseSpeed;
 
-        // 重力
+        // gravity
         if (cc.isGrounded)
             verticalVelocity = -1f;
         else
@@ -197,7 +211,7 @@ public class PlayerController : MonoBehaviour
         Vector3 vel = cc.velocity;
         vel.y = 0f;
         HorizontalSpeed = vel.magnitude;
-        // 步伐（蹲下更慢）
+        // chrouch step
         float stepSpeedMul = isCrouching ? 0.75f : 1f;
 
         if (input.magnitude > 0.1f)
@@ -207,12 +221,57 @@ public class PlayerController : MonoBehaviour
             {
                 stepProgress = 0f;
                 currentLeg = 1 - currentLeg;
+
+                // Footstep Audio
+                bool isMovingNow = HorizontalSpeed > 0.08f;
+                if (cc.isGrounded && isMovingNow && footstep != null)
+                {
+                    // Idle
+                    if (MoveState != PlayerMoveState.Idle)
+                        footstep.PlayStep(MoveState);
+                }
             }
         }
         else
         {
             stepProgress = Mathf.Lerp(stepProgress, 0f, 10f * Time.deltaTime);
         }
+
+        // Noise & State (for EnemyHearing)
+        float moveEps = 0.08f; // 速度很小就当作静止
+        bool isMoving = HorizontalSpeed > moveEps;
+
+        // 判定状态
+        if (!isMoving)
+            MoveState = PlayerMoveState.Idle;
+        else if (isCrouching)
+            MoveState = PlayerMoveState.CrouchWalk;
+        else if (IsRunning)
+            MoveState = PlayerMoveState.Run;
+        else
+            MoveState = PlayerMoveState.Walk;
+
+        // 给每种状态一个“基础噪音” (你可以随时调)
+        float targetNoise =
+            MoveState == PlayerMoveState.Idle ? 0.05f :
+            MoveState == PlayerMoveState.CrouchWalk ? 0.25f :
+            MoveState == PlayerMoveState.Walk ? 0.55f :
+            1.00f;
+
+        // 可选：速度越快越吵（更真实）
+        // 这里用速度对 walk/run 做轻微增益
+        float speedFactor = 1f;
+        if (MoveState == PlayerMoveState.Walk)
+            speedFactor = Mathf.InverseLerp(0.5f, walkSpeed, HorizontalSpeed) * 0.25f + 0.9f; // 0.9~1.15
+        else if (MoveState == PlayerMoveState.Run)
+            speedFactor = Mathf.InverseLerp(walkSpeed, runSpeed, HorizontalSpeed) * 0.25f + 0.95f; // 0.95~1.2
+
+        targetNoise *= speedFactor;
+
+        // 平滑，避免听觉圈抖动
+        Noise01 = Mathf.Lerp(Noise01, targetNoise, 12f * Time.deltaTime);
+        Noise01 = Mathf.Clamp01(Noise01);
+
     }
 
     void UpdateCrouchVisuals()

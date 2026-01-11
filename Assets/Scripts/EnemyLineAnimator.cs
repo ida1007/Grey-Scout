@@ -5,7 +5,7 @@ public class EnemyLineAnimator : MonoBehaviour
 {
     [Header("Refs")]
     public NavMeshAgent agent;
-    public EnemyFollow follow;
+    public EnemyMove mover;
 
     [Header("Leg Settings")]
     public float legLength = 0.6f;
@@ -93,7 +93,7 @@ public class EnemyLineAnimator : MonoBehaviour
     void Awake()
     {
         if (agent == null) agent = GetComponent<NavMeshAgent>();
-        if (follow == null) follow = GetComponent<EnemyFollow>();
+        if (mover == null) mover = GetComponent<EnemyMove>();
     }
 
     void Start()
@@ -108,7 +108,7 @@ public class EnemyLineAnimator : MonoBehaviour
         hasCachedRightArm = false;
         hasCachedRightSpearRot = false;
 
-        bool isAttacking = (follow != null && follow.isAttacking);
+        bool isAttacking = (mover != null && mover.isAttacking);
 
         // NavMeshAgent
         Vector3 vel = agent.velocity;
