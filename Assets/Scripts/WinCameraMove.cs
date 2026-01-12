@@ -3,7 +3,7 @@ using UnityEngine;
 public class WinCameraMove : MonoBehaviour
 {
     public Transform cam;
-    public MonoBehaviour cameraFollow; // 拖你的鼠标控制脚本
+    public MonoBehaviour cameraFollow; 
     public Vector3 moveOffset = new Vector3(0, 6f, -4f);
     public float duration = 6f;
 

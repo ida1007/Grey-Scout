@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class CageDoorOpenInteractable : InteractableBase
+public class CageInteractable : InteractableBase
 {
     public Transform door;
     public float liftHeight = 2f;
@@ -8,6 +8,11 @@ public class CageDoorOpenInteractable : InteractableBase
 
     bool opened;
     Vector3 closedLocalPos, openLocalPos;
+
+    [Header("Audio")]
+    public AudioSource audioSouce;
+    public AudioClip unlockClip;    
+    public float unlockVolume = 1f;
 
     void Awake()
     {
@@ -27,5 +32,12 @@ public class CageDoorOpenInteractable : InteractableBase
     {
         if (opened) return;
         opened = true;
+        PlaySfxAtPoint(unlockClip, unlockVolume);
+    }
+
+    void PlaySfxAtPoint(AudioClip clip, float volume)
+    {
+        if (clip == null) return;
+        AudioSource.PlayClipAtPoint(clip, transform.position, volume);
     }
 }

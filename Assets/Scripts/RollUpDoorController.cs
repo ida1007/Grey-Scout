@@ -11,6 +11,11 @@ public class RollUpDoorController : MonoBehaviour
     public bool isOpen = false;
     public bool lockAfterOpen = false;
 
+    [Header("Audio")]
+    public AudioSource audioSource;
+    public AudioClip bigDoorClip;
+    public float bigDoorVolume = 1f;
+
     Vector3 closedLocalPos;
     Vector3 openLocalPos;
 
@@ -31,7 +36,10 @@ public class RollUpDoorController : MonoBehaviour
 
     public void Open()
     {
+        if (isOpen) return;
         isOpen = true;
+
+        PlaySfxAtPoint(bigDoorClip, bigDoorVolume);
     }
 
     public void Close()
@@ -44,5 +52,11 @@ public class RollUpDoorController : MonoBehaviour
     {
         if (lockAfterOpen && isOpen) return;
         isOpen = !isOpen;
+    }
+
+    void PlaySfxAtPoint(AudioClip clip, float volume)
+    {
+        if (clip == null) return;
+        AudioSource.PlayClipAtPoint(clip, transform.position, volume);
     }
 }

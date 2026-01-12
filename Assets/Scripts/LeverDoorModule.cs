@@ -8,14 +8,13 @@ public class LeverDoorModule : MonoBehaviour
 
     void Awake()
     {
-        // 自动抓子物体（prefab 内安全）
+        // get conponent
         if (lever == null)
             lever = GetComponentInChildren<LeverInteractable>();
 
         if (door == null)
             door = GetComponentInChildren<RollUpDoorController>();
 
-        // 把门注入给拉杆
         if (lever != null)
             lever.door = door;
     }

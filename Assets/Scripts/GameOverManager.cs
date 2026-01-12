@@ -12,7 +12,7 @@ public class GameOverManager : MonoBehaviour
     public Volume globalVolume;
 
     [Header("Grayscale Settings")]
-    public float grayscaleDuration = 0.6f; // 变黑白所需时间（秒）
+    public float grayscaleDuration = 0.6f; 
 
     private ColorAdjustments colorAdjustments;
     private bool isGameOver = false;
@@ -46,10 +46,9 @@ public class GameOverManager : MonoBehaviour
         if (isGameOver) return;
         isGameOver = true;
 
-        // 用 Coroutine + unscaled time 做渐变
+        //Fade
         StartCoroutine(GrayscaleLerp());
 
-        // 游戏立刻停
         Time.timeScale = 0f;
     }
 
@@ -58,7 +57,7 @@ public class GameOverManager : MonoBehaviour
         if (colorAdjustments == null)
             yield break;
 
-        float start = colorAdjustments.saturation.value; // 一般是 0
+        float start = colorAdjustments.saturation.value; 
         float target = -100f;
         float t = 0f;
 

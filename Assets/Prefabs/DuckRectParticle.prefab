@@ -106,4 +106,6 @@ MonoBehaviour:
   startScale: 1
   peakScale: 1.25
   peakTime01: 0.45
+  billboardToCamera: 1
+  rollDeg: 0
   fadeOut: 0

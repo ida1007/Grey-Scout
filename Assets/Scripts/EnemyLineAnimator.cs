@@ -41,29 +41,29 @@ public class EnemyLineAnimator : MonoBehaviour
     public LineRenderer R_armLower;
 
     [Header("Attack (Right Arm Swing)")]
-    public bool freezeLegsOnAttack = true;   // leg frozen
-    public float attackHz = 0.5f; // 每秒几次（建议 1.2~2）
-    [Range(0.05f, 0.6f)] public float windupPortion = 0.5f; // 蓄力占比
-    [Range(0.05f, 0.6f)] public float strikePortion = 0.22f; // 刺击占比（越小越快）
-    [Range(0.5f, 3f)] public float attackMotionScale = 2.0f;  // 总体放大倍率（你要更大就调这个）
+    public bool freezeLegsOnAttack = true;   
+    public float attackHz = 0.5f; 
+    [Range(0.05f, 0.6f)] public float windupPortion = 0.5f; 
+    [Range(0.05f, 0.6f)] public float strikePortion = 0.22f; 
+    [Range(0.5f, 3f)] public float attackMotionScale = 2.0f; 
 
     [Header("Attack Once Pose (Right Arm)")]
-    public Vector3 windupHandDelta = new Vector3(-0.09f, -0.2f, -0.4f); // 蓄力：外展
+    public Vector3 windupHandDelta = new Vector3(-0.09f, -0.2f, -0.4f); 
     public Vector3 windupElbowDelta = new Vector3(-0.56f, 0.5f, -0.7f);
 
-    public Vector3 strikeHandDelta = new Vector3(0.35f, 0.05f, 2f); // 向前刺
+    public Vector3 strikeHandDelta = new Vector3(0.35f, 0.05f, 2f); 
     public Vector3 strikeElbowDelta = new Vector3(0.15f, 0f, 1.5f);
 
     [Header("Right Spear")]
-    public Transform rightSpear;                 // Spear_L
-    public Vector3 rightSpearLocalOffset = new Vector3(0f, 0f, 0f); // 微调位置
-    public Vector3 rightSpearLocalEuler = new Vector3(10f, 0f, 0f);  // 微调旋转
+    public Transform rightSpear;                 
+    public Vector3 rightSpearLocalOffset = new Vector3(0f, 0f, 0f); //correction
+    public Vector3 rightSpearLocalEuler = new Vector3(10f, 0f, 0f);  
     public float rightSpearLength = 0.5f;
 
     [Header("Right Spear Attack Rotation")]
-    public Vector3 spearWindupEuler = new Vector3(-25f, 0f, 10f);   // 蓄力时往后/上翻一点
-    public Vector3 spearStrikeEuler = new Vector3(15f, 0f, -5f);    // 刺击时往前压一点
-    public float spearEulerScale = 1f;                               // 旋转幅度放大
+    public Vector3 spearWindupEuler = new Vector3(-25f, 0f, 10f);   
+    public Vector3 spearStrikeEuler = new Vector3(15f, 0f, -5f);  
+    public float spearEulerScale = 1f;                            
 
     [Header("Leg Transforms")]
     public Transform legLeft;
@@ -134,16 +134,16 @@ public class EnemyLineAnimator : MonoBehaviour
 
         if (isAttacking)
         {
-            // 左手固定（提灯）
+            // left arm
             DrawFixedArm(armLeft, L_armUpper, L_armLower, leftElbowOffset, leftHandOffset, -1);
 
-            // 右手挥臂（长矛攻击）
+            // right arm
             DrawTwoStageStrikeRightArm();
             UpdateRightSpearFromArm();
         }
         else
         {
-            // 非攻击：双手固定姿态
+            // no attacking
             UpdateFixedArms();
             UpdateRightSpearFromArm();
         }
@@ -153,7 +153,7 @@ public class EnemyLineAnimator : MonoBehaviour
     {
         if (isMoving)
         {
-            // 速度越大，迈步越快（你也可以固定不随速度变化）
+            // step speed adjust
             float speedMul = Mathf.Clamp(speed / Mathf.Max(0.01f, agent.speed), 0.6f, 1.4f);
 
             stepProgress += Time.deltaTime * stepSpeed * speedMul;
@@ -165,7 +165,7 @@ public class EnemyLineAnimator : MonoBehaviour
         }
         else
         {
-            // 停下时让步伐缓慢回到 0，脚稳住
+            // step when stop
             stepProgress = Mathf.Lerp(stepProgress, 0f, 10f * Time.deltaTime);
         }
     }
@@ -244,17 +244,17 @@ public class EnemyLineAnimator : MonoBehaviour
 
     void UpdateFixedArms()
     {
-        // 左手：提灯（向前、向上）
+        // left hand
         DrawFixedArm(
             armLeft,
             L_armUpper,
             L_armLower,
             leftElbowOffset,
             leftHandOffset,
-            -1 // 左手
+            -1 
         );
 
-        // 右手：长矛（微弯、略抬）
+        // right hand
         DrawFixedArm(
             armRight,
             R_armUpper,
@@ -262,7 +262,7 @@ public class EnemyLineAnimator : MonoBehaviour
             rightElbowOffset,
             rightHandOffset,
             1,
-            true// 右手
+            true
         );
     }
 
@@ -332,7 +332,7 @@ public class EnemyLineAnimator : MonoBehaviour
         float wEnd = Mathf.Clamp01(windupPortion);
         float sEnd = Mathf.Clamp01(wEnd + strikePortion);
 
-        // 0..1 平滑
+        // smooth
         static float Ease(float t) => t * t * (3f - 2f * t);
 
         Vector3 elbow = baseElbow;
@@ -340,14 +340,14 @@ public class EnemyLineAnimator : MonoBehaviour
 
         if (phase < wEnd)
         {
-            // Windup：从 base -> base + windup
+            // Windup：base -> base + windup
             float t = Ease(phase / Mathf.Max(0.0001f, wEnd));
             elbow = Vector3.Lerp(baseElbow, baseElbow + windupElbowDelta * attackMotionScale, t);
             hand = Vector3.Lerp(baseHand, baseHand + windupHandDelta * attackMotionScale, t);
         }
         else if (phase < sEnd)
         {
-            // Strike：从 windup -> strike（快速向前刺）
+            // Strike：windup -> strike
             float t = Ease((phase - wEnd) / Mathf.Max(0.0001f, (sEnd - wEnd)));
             Vector3 eWind = baseElbow + windupElbowDelta * attackMotionScale;
             Vector3 hWind = baseHand + windupHandDelta * attackMotionScale;
@@ -358,7 +358,7 @@ public class EnemyLineAnimator : MonoBehaviour
         }
         else
         {
-            // Return：从 strike -> base（回位）
+            // Return：strike -> base
             float t = Ease((phase - sEnd) / Mathf.Max(0.0001f, (1f - sEnd)));
             Vector3 eStr = baseElbow + strikeElbowDelta * attackMotionScale;
             Vector3 hStr = baseHand + strikeHandDelta * attackMotionScale;
@@ -391,7 +391,7 @@ public class EnemyLineAnimator : MonoBehaviour
         cachedRightSpearExtraRot = Quaternion.Euler(spearEuler);
         hasCachedRightSpearRot = true;
 
-        // 限制骨长
+        // limit arm lenth
         Vector3 upperDir = (elbow - s).normalized;
         elbow = s + upperDir * upperArmLength;
 
@@ -420,13 +420,10 @@ public class EnemyLineAnimator : MonoBehaviour
         if (dir.sqrMagnitude < 0.0001f) return;
         dir.Normalize();
 
-        // 位置：跟随手 + 向前推一点（握把位置）
         rightSpear.position = hand + dir * (rightSpearLength * 0.2f);
-
-        // 朝向：矛的 forward(+Z) 指向手的方向
         rightSpear.rotation = Quaternion.LookRotation(dir, transform.up);
 
-        // 微调
+        // Correction
         rightSpear.position += rightSpear.TransformDirection(rightSpearLocalOffset);
         rightSpear.rotation *= Quaternion.Euler(rightSpearLocalEuler);
 

@@ -51,24 +51,24 @@ public class CameraFollow : MonoBehaviour
 
         Quaternion rotation = Quaternion.Euler(moveY, moveX, 0);
 
-        //玩家朝向同步
+        //Player orientation synchronisation
         Vector3 forward = rotation * Vector3.forward;
         forward.y = 0f;
         //target.forward = forward;
 
-        //给玩家修正相机朝向
+        //Adjust rotation for player
         camForward = forward.normalized;
         camRight = (rotation * Vector3.right).normalized;
         camRight.y = 0;
 
-        //相机位置
+        //camera position
         Vector3 offset = rotation * new Vector3(0,height,-distance);
         Vector3 targetPos = target.position + offset;
 
-        //摄像机移动
+        //cam move
         transform.position = Vector3.Lerp(transform.position,targetPos, followSpeed * Time.deltaTime);
 
-        //摄像机看向Player
+        //cam look at Player
         Quaternion lookRot = Quaternion.LookRotation(target.position + Vector3.up - transform.position);
         transform.rotation = Quaternion.Lerp(transform.rotation, lookRot, rotateSpeed * Time.deltaTime);
     }
