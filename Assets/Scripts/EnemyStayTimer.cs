@@ -4,15 +4,15 @@ public class EnemyStayTimer : MonoBehaviour
 {
     [Header("Stay Timer Settings")]
     public float hearingIncreaseSpeed;
-    public float visionIncreaseSpeed; // 警戒值上升速度
-    public float decreaseSpeed; // 警戒值下降速度
-    public float threshold; // 警戒值满值
+    public float visionIncreaseSpeed;
+    public float decreaseSpeed;
+    public float threshold; // full alertValue
 
     [Header("After Lost")]
     public float staySeconds = 3f;
 
     [Header("RunTime")]
-    public float alertValue; // 当前警戒值
+    public float alertValue; // alertValue now
     public bool isFollow;
     public bool isWaiting;
     public bool isReturning;

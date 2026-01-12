@@ -161,7 +161,6 @@ public class HostageFollowNew: MonoBehaviour
         Vector3 toTarget = targetPos - transform.position;
         toTarget.y = 0f;
 
-        //计算水平方向
         //Vector3 moveDir = Vector3.zero;
         //if (currentDist > followDistance)
         //{
@@ -187,7 +186,7 @@ public class HostageFollowNew: MonoBehaviour
             desiredHorizontalVel = dir * spd;
         }
 
-        // 平滑水平速度（避免抖动）
+        // smooth horizon speed
         horizontalVel = Vector3.Lerp(horizontalVel, desiredHorizontalVel, horizontalSmooth * Time.deltaTime);
 
         displacement += horizontalVel * Time.deltaTime;
@@ -204,7 +203,7 @@ public class HostageFollowNew: MonoBehaviour
         // upload lastPlayerPos
         lastTargetPos = followTarget.position;
 
-        // 4) 动画切换依据：玩家速度（优先用玩家 HorizontalSpeed；没有就用玩家位移估算）
+        // anim change base on player speed
         float playerHorizontalSpeed = 0f;
 
         if (player3C != null && player3C.HorizontalSpeed > 0f)
@@ -262,14 +261,13 @@ public class HostageFollowNew: MonoBehaviour
         }
     }
 
-    // ===================== 动画：步态（切换 Walk/Run/Idle） =====================
+    // anim between Walk/Run/Idle 
 
     void UpdateStepBySpeed(float playerSpeed, bool playerMoving, bool playerRun)
     {
-        // 你希望“玩家跑->人质也跑；玩家蹲->人质蹲”，这里步频根据跑步加速
         float stepMul = playerRun ? runStepMul : walkStepMul;
 
-        // 蹲下时步频略慢一点（也可以调）
+        // slow step when crouch
         stepMul *= Mathf.Lerp(1f, 0.75f, crouch01);
 
         if (playerMoving)
@@ -284,12 +282,12 @@ public class HostageFollowNew: MonoBehaviour
         }
         else
         {
-            // 不动 -> 慢慢回到站立相位（腿脚稳定）
+            // stop -> idle
             stepProgress = Mathf.Lerp(stepProgress, 0f, idleReturnSpeed * Time.deltaTime);
         }
     }
 
-    // ===================== 动画：腿 =====================
+    // anim arm
 
     void UpdateLegs()
     {
@@ -348,7 +346,7 @@ public class HostageFollowNew: MonoBehaviour
         foot.SetPosition(1, footCurrent + transform.forward * 0.15f);
     }
 
-    // ===================== 动画：手臂 =====================
+    // anim arm
 
     void UpdateArms()
     {

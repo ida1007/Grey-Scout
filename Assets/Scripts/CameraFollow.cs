@@ -3,13 +3,13 @@ using UnityEngine;
 public class CameraFollow : MonoBehaviour
 {
     [Header("Target")]
-    public Transform target; //玩家位置
+    public Transform target; 
 
     [Header("Setting")]
-    public float height; //摄像机高度
-    public float distance; //摄像机与player距离
-    public float followSpeed; //移动平滑
-    public float rotateSpeed; //旋转平滑
+    public float height; 
+    public float distance; 
+    public float followSpeed; 
+    public float rotateSpeed; 
 
     [Header("Ratation Limits")]
     public float minMoveX;

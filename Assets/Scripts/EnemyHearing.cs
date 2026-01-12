@@ -94,12 +94,12 @@ public class EnemyHearing : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
-        // 实时听觉圈（运行时更有用）
+        // listen range
         Gizmos.color = Color.yellow;
         float r = Application.isPlaying ? currentHearingRange : minHearingRange;
         Gizmos.DrawWireSphere(transform.position, r);
 
-        // Duck 范围
+        // Duck range
         Gizmos.color = new Color(1f, 0.5f, 0f);
         Gizmos.DrawWireSphere(transform.position, duckRange);
     }

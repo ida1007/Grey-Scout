@@ -39,7 +39,7 @@ public class RollUpDoorController : MonoBehaviour
         if (isOpen) return;
         isOpen = true;
 
-        PlaySfxAtPoint(bigDoorClip, bigDoorVolume);
+        PlaySfxAtPoint(bigDoorClip, bigDoorVolume); //Audio
     }
 
     public void Close()

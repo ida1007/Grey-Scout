@@ -2,12 +2,11 @@ using UnityEngine;
 
 public class InteractZone : MonoBehaviour
 {
-    public InteractableBase interactable;   // 拖要交互的物体脚本
-    public GameObject promptUI;             // “E”提示的UI物体（世界空间UI或小图标）
+    public InteractableBase interactable;   
+    public GameObject promptUI;            
 
     void Reset()
     {
-        // 自动找：常见做法是 Trigger 是子物体，Interactable 在父物体
         if (interactable == null)
             interactable = GetComponentInParent<InteractableBase>();
     }

@@ -43,10 +43,10 @@ public class EnemyVision : MonoBehaviour
         Vector3 dir = player.position - eyePoint.position;
         float distance = dir.magnitude;
 
-        if (distance > viewDistance) // 超出视距
+        if (distance > viewDistance) // out FOV
             return false;
         
-        float angle = Vector3.Angle(eyePoint.forward, dir); // 是否在视野角度内
+        float angle = Vector3.Angle(eyePoint.forward, dir); // Check FOV
         return angle <= fovAngle * 0.5f;
     }
 

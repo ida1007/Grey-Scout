@@ -4,7 +4,7 @@ public class PlayerInteractor : MonoBehaviour
 {
     public KeyCode interactKey = KeyCode.E;
 
-    // first interact
+    // promise first interact
     public InteractableBase current;
 
     void Update()

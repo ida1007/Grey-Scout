@@ -19,19 +19,19 @@ public class FootstepAudio : MonoBehaviour
     public Vector2 pitchRange = new Vector2(0.92f, 1.08f);
 
     [Header("Anti-Spam")]
-    public float minInterval = 0.10f; // 防止一帧多次触发
+    public float minInterval = 0.10f; // Avoid repeat
     private float lastTime = -999f;
 
     [Header("Surface Detect (Optional)")]
     public bool useSurface = true;
-    public Transform rayOrigin;           // 通常放脚下或角色中心
+    public Transform rayOrigin;           
     public float rayDistance = 1.5f;
     public LayerMask groundMask = ~0;
 
     [System.Serializable]
     public class SurfaceSet
     {
-        public string surfaceTag;         // 地面tag
+        public string surfaceTag;         // Groud Tag
         public AudioClip[] walk;
         public AudioClip[] run;
         public AudioClip[] crouch;
@@ -44,17 +44,15 @@ public class FootstepAudio : MonoBehaviour
         if (Time.time - lastTime < minInterval) return;
         lastTime = Time.time;
 
-        // 1) 先决定用哪套clips（默认 or surface）
         AudioClip[] pool = GetClipsByState(state);
 
-        // 2) 没有clip就直接不播
         if (pool == null || pool.Length == 0) return;
 
-        // 3) 随机一个clip + 随机pitch
+        // random clip and pitch
         var clip = pool[Random.Range(0, pool.Length)];
         source.pitch = Random.Range(pitchRange.x, pitchRange.y);
 
-        // 4) 不同状态音量
+        // diff volume
         float vol =
             state == PlayerController.PlayerMoveState.Run ? runVol :
             state == PlayerController.PlayerMoveState.CrouchWalk ? crouchVol :
@@ -83,7 +81,7 @@ public class FootstepAudio : MonoBehaviour
             }
         }
 
-        // fallback 默认选择
+        // fallback Default choise
         return state == PlayerController.PlayerMoveState.Run ? runClips :
                state == PlayerController.PlayerMoveState.CrouchWalk ? crouchClips :
                walkClips;

@@ -25,13 +25,13 @@ public class DuckVisualEmitter : MonoBehaviour
     public float peakScaleRand = 0.15f;
 
     [Header("Spawn Spread")]
-    public float spawnRadius = 1f;   
+    public float spawnRadius = 1f;
     public float spawnForward = 0.10f;
     public float spawnUp = 0.06f;
 
     [Header("Orientation")]
-    public float rollJitterDeg = 25f;   
-    public bool faceCamera = false;     
+    public float rollJitterDeg = 25f;
+    public bool faceCamera = false;
     [Header("Life")]
     public float life = 0.35f;
 
@@ -56,8 +56,7 @@ public class DuckVisualEmitter : MonoBehaviour
 
         int count = Random.Range(minCount, maxCount + 1);
 
-        // birthplace
-        Vector3 spawnPos = transform.TransformPoint(localOffset);
+        Vector3 spawnPos = transform.TransformPoint(localOffset); // birthplace
 
         for (int i = 0; i < count; i++)
         {
@@ -84,14 +83,12 @@ public class DuckVisualEmitter : MonoBehaviour
             float spd = Random.Range(0.95f, 1.25f);
             Vector3 v = dir * spd;
             v += transform.right * Random.Range(-sideJitter, sideJitter) * 0.35f;
-
             p.velocity = v;
 
             // rotation
             float roll = Random.Range(-rollJitterDeg, rollJitterDeg);
-            p.rollDeg = roll;                  
-            p.billboardToCamera = true;         
-
+            p.rollDeg = roll;
+            p.billboardToCamera = true;
 
             // routine
             p.life = life * Random.Range(0.9f, 1.15f);

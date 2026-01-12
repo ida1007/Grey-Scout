@@ -28,7 +28,7 @@ public class PlayerDeath : MonoBehaviour
 
         Debug.Log("Player Dead");
 
-        PlayDeathSound();
+        PlayDeathSound();// Audio
 
         if (DeathUI) DeathUI.SetActive(true);
 

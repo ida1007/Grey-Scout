@@ -4,15 +4,11 @@ using UnityEngine;
 public class ConstantScreenSize : MonoBehaviour
 {
     [Header("Camera")]
-    [Tooltip("自动查找名称为 UICamera 的相机")]
     public string uiCameraName = "UICamera";
     private Camera uiCamera;
 
     [Header("Screen Size")]
-    [Tooltip("希望物体在屏幕上看起来的高度（像素）")]
     public float targetPixelHeight = 80f;
-
-    [Tooltip("物体在 localScale = 1 时的世界高度")]
     public float objectWorldHeightAtScale1 = 1f;
 
     [Header("Options")]
@@ -57,7 +53,7 @@ public class ConstantScreenSize : MonoBehaviour
         Vector3 camPos = uiCamera.transform.position;
         Vector3 objPos = transform.position;
 
-        // 使用投影距离，避免斜向误差
+        // Utilise the projection distance to avoid 3D dis errors
         float distance = Vector3.Dot(objPos - camPos, uiCamera.transform.forward);
         distance = Mathf.Max(0.01f, distance);
 
@@ -82,7 +78,7 @@ public class ConstantScreenSize : MonoBehaviour
         if (billboard)
         {
             Vector3 dir = objPos - camPos;
-            dir.y = 0f; // 如果你希望上下也对准相机，删掉这行
+            dir.y = 0f; 
             if (dir.sqrMagnitude > 0.0001f)
                 transform.rotation = Quaternion.LookRotation(dir.normalized, Vector3.up);
         }

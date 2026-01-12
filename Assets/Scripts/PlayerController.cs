@@ -132,7 +132,6 @@ public class PlayerController : MonoBehaviour
 
     void OnEnable()
     {
-        //事件方式：performed=按下, canceled=松开
         if (crouchAction != null && crouchAction.action != null)
         {
             crouchAction.action.performed += OnCrouchPerformed;
@@ -238,10 +237,10 @@ public class PlayerController : MonoBehaviour
         }
 
         // Noise & State (for EnemyHearing)
-        float moveEps = 0.08f; // 速度很小就当作静止
+        float moveEps = 0.08f; // when v very low is stop
         bool isMoving = HorizontalSpeed > moveEps;
 
-        // 判定状态
+        // states check
         if (!isMoving)
             MoveState = PlayerMoveState.Idle;
         else if (isCrouching)
@@ -251,24 +250,23 @@ public class PlayerController : MonoBehaviour
         else
             MoveState = PlayerMoveState.Walk;
 
-        // 给每种状态一个“基础噪音” (你可以随时调)
+        // give diff states diff noices
         float targetNoise =
             MoveState == PlayerMoveState.Idle ? 0.05f :
             MoveState == PlayerMoveState.CrouchWalk ? 0.25f :
             MoveState == PlayerMoveState.Walk ? 0.55f :
             1.00f;
 
-        // 可选：速度越快越吵（更真实）
-        // 这里用速度对 walk/run 做轻微增益
+        // add a little voice walk/run (base on speed)
         float speedFactor = 1f;
         if (MoveState == PlayerMoveState.Walk)
-            speedFactor = Mathf.InverseLerp(0.5f, walkSpeed, HorizontalSpeed) * 0.25f + 0.9f; // 0.9~1.15
+            speedFactor = Mathf.InverseLerp(0.5f, walkSpeed, HorizontalSpeed) * 0.25f + 0.9f; 
         else if (MoveState == PlayerMoveState.Run)
-            speedFactor = Mathf.InverseLerp(walkSpeed, runSpeed, HorizontalSpeed) * 0.25f + 0.95f; // 0.95~1.2
+            speedFactor = Mathf.InverseLerp(walkSpeed, runSpeed, HorizontalSpeed) * 0.25f + 0.95f; 
 
         targetNoise *= speedFactor;
 
-        // 平滑，避免听觉圈抖动
+        // smooth
         Noise01 = Mathf.Lerp(Noise01, targetNoise, 12f * Time.deltaTime);
         Noise01 = Mathf.Clamp01(Noise01);
 
@@ -281,16 +279,16 @@ public class PlayerController : MonoBehaviour
 
         if (body != null)
         {
-            // 前倾
+            // front
             Quaternion lean = Quaternion.Euler(crouchLeanAngle * crouch01, 0f, 0f);
             body.localRotation = Quaternion.Slerp(body.localRotation, bodyBaseLocalRot * lean, crouchLerp * Time.deltaTime);
 
-            // 下移
+            // down
             Vector3 downPos = bodyBaseLocalPos + Vector3.down * (crouchBodyDown * crouch01);
             body.localPosition = Vector3.Lerp(body.localPosition, downPos, crouchLerp * Time.deltaTime);
         }
 
-        // 推荐：控制器也蹲下
+        // CC Crouch
         if (adjustControllerOnCrouch && cc != null)
         {
             float targetH = Mathf.Lerp(standHeight, crouchHeight, crouch01);
@@ -323,7 +321,7 @@ public class PlayerController : MonoBehaviour
         Vector3 hipPos = hip.position;
         float step = stepProgress;
 
-        // 蹲下时腿变短、步幅变小、抬脚变低（平滑）
+        // crouch leg change
         float legLen = Mathf.Lerp(legLength, legLength * crouchLegMul, crouch01);
         float sLen = Mathf.Lerp(stepLength, stepLength * crouchStepLenMul, crouch01);
         float sHeight = Mathf.Lerp(stepHeight, stepHeight * crouchStepHeightMul, crouch01);

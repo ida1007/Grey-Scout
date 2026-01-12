@@ -17,7 +17,7 @@ public class EnemyLineAnimator : MonoBehaviour
 
     [Header("Body (Optional)")]
     public Transform body;
-    public float bodyBobAmount = 0.05f;     // 上下轻微起伏
+    public float bodyBobAmount = 0.05f; 
     public float bodyBobSpeed = 6f;
     private Vector3 bodyBaseLocalPos;
 
@@ -203,7 +203,7 @@ public class EnemyLineAnimator : MonoBehaviour
         }
         else
         {
-            // 非迈步腿：保持在“正下方”
+            //  the leg not in stepping
             if (footCurrent == Vector3.zero)
                 footTarget = hipPos + transform.up * -legLength;
             else

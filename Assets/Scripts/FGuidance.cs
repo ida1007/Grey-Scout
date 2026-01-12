@@ -3,21 +3,15 @@ using UnityEngine;
 public class FGuidance : MonoBehaviour
 {
     [Header("UI")]
-    [Tooltip("进入区域后显示的提示UI（比如世界空间UI、Canvas上的一个Panel等）")]
     public GameObject promptUI;
 
     [Header("Input")]
-    [Tooltip("按下这个键后结束引导并继续游戏")]
     public KeyCode continueKey = KeyCode.F;
 
     [Header("Behavior")]
-    [Tooltip("是否只触发一次")]
     public bool triggerOnce = true;
-
-    [Tooltip("进入区域后是否暂停游戏")]
     public bool pauseOnEnter = true;
 
-    [Tooltip("玩家Tag（默认Player）")]
     public string playerTag = "Player";
 
     private bool playerInside = false;

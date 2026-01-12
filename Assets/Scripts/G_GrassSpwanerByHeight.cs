@@ -41,7 +41,7 @@ public class GrassSpawnerGridByHeight : MonoBehaviour
     [Header("Safety")]
     public int maxInstances = 50000;
 
-    // 为了减少 GC：复用数组（可选，但很实用）
+    // reduce CG
     private Collider[] _overlapBuffer = new Collider[64];
 
     void Start()
@@ -76,7 +76,7 @@ public class GrassSpawnerGridByHeight : MonoBehaviour
             ? QueryTriggerInteraction.Collide
             : QueryTriggerInteraction.Ignore;
 
-        // 网格遍历：以 spacing 为步长扫过整个地形 XZ
+        // Grid traversal: Sweeping across the entire terrain XZ with spacing as the stride
         for (float x = 0f; x <= size.x; x += spacing)
         {
             for (float z = 0f; z <= size.z; z += spacing)
@@ -88,7 +88,7 @@ public class GrassSpawnerGridByHeight : MonoBehaviour
                     return;
                 }
 
-                // 抖动，让分布不那么“棋盘”
+                // Jitter making the distribution less grid-like
                 float jx = (jitter > 0f) ? Random.Range(-jitter, jitter) : 0f;
                 float jz = (jitter > 0f) ? Random.Range(-jitter, jitter) : 0f;
 
@@ -98,27 +98,27 @@ public class GrassSpawnerGridByHeight : MonoBehaviour
                 float worldX = tPos.x + localX;
                 float worldZ = tPos.z + localZ;
 
-                // 可选：噪声遮罩（让草有“块状自然边缘”，否则就是完全铺满）
+                // Noise mask
                 if (useNoiseMask)
                 {
                     float n = Mathf.PerlinNoise(worldX * noiseScale, worldZ * noiseScale);
                     if (n < noiseThreshold) continue;
                 }
 
-                // 采样高度（世界 Y）
+                // Height（World Y）
                 float worldY = terrain.SampleHeight(new Vector3(worldX, 0f, worldZ)) + tPos.y;
                 if (worldY < minWorldHeight || worldY > maxWorldHeight) continue;
 
-                // 坡度过滤
+                // Slope filtering
                 Vector3 normal = td.GetInterpolatedNormal(localX / size.x, localZ / size.z);
                 float slopeDeg = Vector3.Angle(normal, Vector3.up);
                 if (slopeDeg > maxSlopeDeg) continue;
 
-                // 避障：Obstacle 附近不生成（Terrain 也在 Obstacle 没问题：会忽略 TerrainCollider）
+                // Avoid Obstacle - ignore TerrainCollider
                 if (excludeRadius > 0.001f && IsNearObstacle(worldX, worldY, worldZ, qti))
                     continue;
 
-                // 生成
+                // Generation
                 Vector3 pos = new Vector3(worldX, worldY, worldZ);
 
                 Quaternion yaw = Quaternion.Euler(0f, Random.Range(randomYawDeg.x, randomYawDeg.y), 0f);
@@ -132,16 +132,14 @@ public class GrassSpawnerGridByHeight : MonoBehaviour
                 spawned++;
             }
         }
-
-        Debug.Log($"[GrassSpawnerGridByHeight] Spawned: {spawned} (spacing={spacing}, height={minWorldHeight}-{maxWorldHeight})");
     }
 
     private bool IsNearObstacle(float worldX, float worldY, float worldZ, QueryTriggerInteraction qti)
     {
-        // 探测点抬高：减少和地面的“无意义接触”
+        // Elevated detection point: Minimising unnecessary contact with the ground
         Vector3 probePos = new Vector3(worldX, worldY + probeHeight, worldZ);
 
-        // 用 NonAlloc 减少 GC（比 OverlapSphere 更稳）
+        // Reduce GC with NonAlloc
         int hitCount = Physics.OverlapSphereNonAlloc(probePos, excludeRadius, _overlapBuffer, obstacleMask, qti);
 
         if (hitCount <= 0) return false;
@@ -150,9 +148,7 @@ public class GrassSpawnerGridByHeight : MonoBehaviour
         {
             Collider c = _overlapBuffer[i];
             if (c == null) continue;
-
-            // 关键：Terrain 在 Obstacle 图层时，必须忽略它，否则会全被判定为“附近有障碍”
-            if (c is TerrainCollider)
+            if (c is TerrainCollider) //ignore Terrain
                 continue;
             return true;
         }

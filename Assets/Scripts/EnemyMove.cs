@@ -57,35 +57,34 @@ public class EnemyMove : MonoBehaviour
     {
         if (stayTimer == null || agent == null) return;
 
-        // 非追击时：攻击态清掉
         if (!stayTimer.isFollow) isAttacking = false;
 
-        // 1) Follow（追击）最高优先级
+        // Follow first range
         if (stayTimer.isFollow && player != null)
         {
             UpdateFollow();
             return;
         }
 
-        // 2) Return（回家）第二优先级
+        // Return second range
         if (stayTimer.isReturning)
         {
             UpdateReturn();
             return;
         }
 
-        // 3) Investigate（调查）第三优先级（注意：waiting 的时候 stayTimer 会 return，所以这里不要用 isWaiting）
+        // Investigate third range
         if (isInvestigating)
         {
             UpdateInvestigate();
             return;
         }
 
-        // 4) Waiting / Idle
+        // Waiting / Idle
         UpdateWait();
     }
 
-    // ===================== Follow =====================
+    // Follow 
     void UpdateFollow()
     {
         float dist = FlatDistance(transform.position, player.position);
@@ -115,10 +114,9 @@ public class EnemyMove : MonoBehaviour
         FaceMoveDirection(agent.velocity);
     }
 
-    // ===================== Return =====================
+    // Return
     void UpdateReturn()
     {
-        // 回家时：停止调查
         isInvestigating = false;
         investigateStopTimer = 0f;
         repathTimer = 0f;
@@ -140,13 +138,10 @@ public class EnemyMove : MonoBehaviour
         FaceMoveDirection(agent.velocity);
     }
 
-    // ===================== Investigate =====================
+    //Investigate
     void UpdateInvestigate()
     {
-        // 如果 stayTimer 在 waiting 状态（它内部会 return），你希望 Duck 能打断 waiting 的话：
-        // 你已经在 ApplyDuckAlertJump 里把 isWaiting/isReturning 清掉了，所以这里不用额外处理。
-
-        // 到达后停留
+        // stop after arriving
         if (investigateStopTimer > 0f)
         {
             investigateStopTimer -= Time.deltaTime;
@@ -160,11 +155,11 @@ public class EnemyMove : MonoBehaviour
             return;
         }
 
-        // 正常走向目标
+        // walk to player
         agent.isStopped = false;
         agent.stoppingDistance = investigateArriveDistance;
 
-        // 避免频繁 SetDestination
+        // avoid SetDestination
         if (repathTimer > 0f) repathTimer -= Time.deltaTime;
 
         if ((!agent.hasPath || agent.pathStatus != NavMeshPathStatus.PathComplete) && repathTimer <= 0f)
@@ -173,7 +168,7 @@ public class EnemyMove : MonoBehaviour
             agent.SetDestination(investigatePos);
         }
 
-        // 到达判定（pathPending 结束后再看 remainingDistance）
+        // arrive check
         if (!agent.pathPending && agent.hasPath && agent.remainingDistance <= investigateArriveDistance)
         {
             agent.ResetPath();
@@ -193,19 +188,15 @@ public class EnemyMove : MonoBehaviour
         FaceMoveDirection(agent.velocity);
     }
 
-    // ===================== Public API =====================
+    // Public thinhs
     public void GoInvestigate(Vector3 pos)
     {
         if (agent == null || stayTimer == null) return;
 
-        // 追击中不接管（你也可以改成允许追击时更新 investigatePos，但不会生效因为 follow 优先级更高）
         if (stayTimer.isFollow) return;
 
-        // Duck 会在 ApplyDuckAlertJump 里清掉 waiting/returning
-        // 这里做得更稳：再清一次回家状态下的路径
         if (stayTimer.isReturning)
         {
-            // 允许 Duck 打断回家：你 StayTimer 里已经 isReturning=false 了
             agent.ResetPath();
         }
 
@@ -230,7 +221,7 @@ public class EnemyMove : MonoBehaviour
             agent.ResetPath();
     }
 
-    // ===================== Helpers =====================
+    // Face to 
     private void FaceMoveDirection(Vector3 velocity)
     {
         Vector3 dir = velocity;

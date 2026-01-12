@@ -24,7 +24,7 @@ public class HostageManager : MonoBehaviour
     {
         boatHostages = boatHostagesLine;
 
-        // 可选：初始化时全关
+        // Close all at first
         for (int i = 0; i < boatHostages.Count; i++)
         {
             if (boatHostages[i] != null)
@@ -49,18 +49,18 @@ public class HostageManager : MonoBehaviour
         if (boatHostages == null || boatHostages.Count == 0)
             return;
 
-        // 这次搬运后船上应有的“总数”
+       // Boat num this time should be
         int tempTotalNum = currentBoatNum + followHostages.Count;
         tempTotalNum = Mathf.Clamp(tempTotalNum, 0, boatHostages.Count);
 
-        // 销毁跟随人质（你原来的逻辑）
+        // Destroy Follow Hostage
         foreach (var h in followHostages)
         {
             if (h != null)
                 Destroy(h);
         }
 
-        // 根据 tempTotalNum 显示船上的“站位人质”
+        // follow tempTotalNum show Hostage in Boat
         for (int i = 0; i < boatHostages.Count; i++)
         {
             GameObject boatHostage = boatHostages[i];
@@ -69,7 +69,6 @@ public class HostageManager : MonoBehaviour
             boatHostage.SetActive(i < tempTotalNum);
         }
 
-        // 键：别在循环里 ++，直接赋值
         currentBoatNum = tempTotalNum;
 
         followHostages.Clear();
