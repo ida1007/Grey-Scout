@@ -4164,7 +4164,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 316728082}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: GrassRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12921,8 +12921,6 @@ PrefabInstance:
       value: 0.78409004
       objectReference: {fileID: 0}
     m_RemovedComponents:
-    - {fileID: 5958833412332165613, guid: 43a662ec909c6b44aa7782e146d34879, type: 3}
-    - {fileID: 1374276342275405013, guid: 43a662ec909c6b44aa7782e146d34879, type: 3}
     - {fileID: 8634655128374136566, guid: 43a662ec909c6b44aa7782e146d34879, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -16850,10 +16848,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.4
-  m_Height: 2.2
+  m_Radius: 0.35
+  m_Height: 1.5
   m_Direction: 1
-  m_Center: {x: 0, y: 0.7, z: 0}
+  m_Center: {x: 0, y: 0.8, z: 0}
 --- !u!82 &1448652466
 AudioSource:
   m_ObjectHideFlags: 0
@@ -28717,6 +28715,10 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 1698828023}
+    - target: {fileID: 2636838398264325770, guid: 7fce5efa12571c243ad352a71db1aac9, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.4
+      objectReference: {fileID: 0}
     - target: {fileID: 4328125842100943726, guid: 7fce5efa12571c243ad352a71db1aac9, type: 3}
       propertyPath: player
       value: 
@@ -28724,6 +28726,14 @@ PrefabInstance:
     - target: {fileID: 4532614160171631545, guid: 7fce5efa12571c243ad352a71db1aac9, type: 3}
       propertyPath: m_Name
       value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 5173411041157443578, guid: 7fce5efa12571c243ad352a71db1aac9, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.014000189
+      objectReference: {fileID: 0}
+    - target: {fileID: 5411787807541584985, guid: 7fce5efa12571c243ad352a71db1aac9, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.014
       objectReference: {fileID: 0}
     - target: {fileID: 6168175967769355871, guid: 7fce5efa12571c243ad352a71db1aac9, type: 3}
       propertyPath: player

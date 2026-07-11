@@ -56,7 +56,7 @@ public class EnemyVision : MonoBehaviour
         Vector3 target = player.position + Vector3.up * 1.2f;
         Vector3 direction = (target - origin).normalized;
         float distance = Vector3.Distance(origin, target);
-        
+
         if (Physics.Raycast(origin, direction, distance, obstacleMask))
             return false;
 

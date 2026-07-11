@@ -20,7 +20,7 @@ public class EnemyMove : MonoBehaviour
     public float returnStopRange = 0.3f;
 
     [Header("Investigate Settings")]
-    public float investigateArriveDistance = 1.2f;
+    public float investigateArriveDistance = 3f;
     public float investigateStopSeconds = 1.0f;
     public float repathInterval = 0.25f;
 
@@ -169,11 +169,13 @@ public class EnemyMove : MonoBehaviour
         }
 
         // arrive check
-        if (!agent.pathPending && agent.hasPath && agent.remainingDistance <= investigateArriveDistance)
+        float distToInvestigate = FlatDistance(transform.position, investigatePos);
+        if (distToInvestigate <= investigateArriveDistance)
         {
-            agent.ResetPath();
             agent.isStopped = true;
+            agent.ResetPath();
             investigateStopTimer = investigateStopSeconds;
+            return;
         }
 
         FaceMoveDirection(agent.velocity);
